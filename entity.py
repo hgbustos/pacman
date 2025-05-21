@@ -130,7 +130,7 @@ class Entity(object):
         return directions[randint(0, len(directions)-1)]
 
    
-   """    Devuelve la dirección más cercana al objetivo.
+    """    Devuelve la dirección más cercana al objetivo.
         Calcula la distancia entre la posición de la entidad y el objetivo para cada dirección válida."""
     def goalDirection(self, directions):
         distances = []

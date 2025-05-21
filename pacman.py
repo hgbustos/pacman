@@ -1,3 +1,4 @@
+
 import pygame
 from pygame.locals import *
 from vector import Vector2
@@ -6,15 +7,32 @@ from entity import Entity
 from sprites import PacmanSprites
 
 class Pacman(Entity):
+    """
+    Representa al personaje Pac-Man en el juego.
+
+    Atributos:
+        name (str): Nombre de la entidad.
+        color (tuple): Color del personaje (amarillo).
+        direction (int): Dirección inicial del movimiento.
+        alive (bool): Estado de vida del personaje.
+        sprites (PacmanSprites): Sprites de animación de Pac-Man.
+    """
+
     def __init__(self, node):
         Entity.__init__(self, node )
         self.name = PACMAN    
-        self.color = YELLOW
+        self.color = YELLOW #
         self.direction = LEFT
         self.setBetweenNodes(LEFT)
         self.alive = True
         self.sprites = PacmanSprites(self)
 
+    
+    """ Inicializa la posición y el radio de colisión del personaje. 
+    al igual que la dirección inicial y el estado de vida.
+    Args:
+        node (Node): Nodo en el que se encuentra el personaje.
+    """
     def reset(self):
         Entity.reset(self)
         self.direction = LEFT
@@ -23,10 +41,25 @@ class Pacman(Entity):
         self.image = self.sprites.getStartImage()
         self.sprites.reset()
 
+
+    """ Establece la posición del personaje en el nodo actual. 
+        Se asegura de que la posición esté dentro de los límites del nodo.
+        
+        Args:
+            node (Node): Nodo en el que se encuentra el personaje.
+        """ 
     def die(self):
         self.alive = False
         self.direction = STOP
 
+    
+    """ metodo para actualizar la posición del personaje en función de la dirección y la velocidad.
+        Se mueve en la dirección actual y verifica si ha alcanzado el nodo objetivo.
+        Si es así, cambia la dirección y establece un nuevo nodo objetivo.
+        
+        Args:
+            dt (float): Delta time para el movimiento.
+        """
     def update(self, dt):	
         self.sprites.update(dt)
         self.position += self.directions[self.direction]*self.speed*dt
@@ -48,6 +81,14 @@ class Pacman(Entity):
             if self.oppositeDirection(direction):
                 self.reverseDirection()
 
+
+    """ Cambia la dirección del personaje en función de la tecla presionada.
+        Args:
+            direction (int): Nueva dirección del movimiento.
+        
+        Returns:
+            int: Nueva dirección del movimiento.
+        """
     def getValidKey(self):
         key_pressed = pygame.key.get_pressed()
         if key_pressed[K_UP]:
@@ -60,15 +101,43 @@ class Pacman(Entity):
             return RIGHT
         return STOP  
 
+
+    """ metodo para verificar si el personaje ha alcanzado el nodo objetivo.
+        Se utiliza para determinar si el personaje ha llegado a su destino.
+        
+        Returns:
+            bool: True si ha alcanzado el nodo objetivo, False en caso contrario.
+        """
     def eatPellets(self, pelletList):
         for pellet in pelletList:
             if self.collideCheck(pellet):
                 return pellet
         return None    
     
+
+    
+    """ metodo colision para verificar si el personaje ha colisionado con un fantasma.
+        Se utiliza para determinar si el personaje ha chocado con un fantasma.
+        
+        Args:
+            ghost (Ghost): Fantasma con el que se verifica la colisión.
+        
+        Returns:
+            bool: True si ha colisionado, False en caso contrario.
+        """
     def collideGhost(self, ghost):
         return self.collideCheck(ghost)
 
+
+    """ metodo colision para verificar si el personaje ha colisionado con un pellet.
+        Se utiliza para determinar si el personaje ha chocado con un pellet.
+        
+        Args:
+            pellet (Pellet): Pellet con el que se verifica la colisión.
+        
+        Returns:
+            bool: True si ha colisionado, False en caso contrario.
+        """
     def collideCheck(self, other):
         d = self.position - other.position
         dSquared = d.magnitudeSquared()
