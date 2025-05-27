@@ -14,7 +14,8 @@ from mazedata import MazeData
 
 #modificacion 27/5 dario
 #importacion de power up 
-from powerup import PowerUp,LaserPowerUp
+from powerup import PowerUp,LaserPowerUp,GunPowerUp
+from powerup import Bullet
 import random
 
 """ clase GameController
@@ -62,8 +63,7 @@ class GameController(object):
         self.fruitNode = None
         self.mazedata = MazeData()
 
-
-
+        
 
         #modificacion 27/5 dario
         self.powerup = None  # o una lista si habrá varios
@@ -199,6 +199,24 @@ class GameController(object):
         else:
             self.pacman.update(dt)
 
+            #arma 27/5 dario
+        for bullet in self.pacman.bullets[:]:
+            bullet.update(dt)
+            # Elimina la bala si sale de la pantalla
+            if bullet.position.x < 0 or bullet.position.x > SCREENSIZE[0]:
+                self.pacman.bullets.remove(bullet)
+            
+        #colision bala fantasma
+        for bullet in self.pacman.bullets[:]:
+            for ghost in self.ghosts.ghosts[:]:
+                # Convierte ghost.position a pygame.math.Vector2 usando sus componentes x e y
+                bullet_pos = pygame.math.Vector2(bullet.position.x, bullet.position.y)
+                ghost_pos = pygame.math.Vector2(ghost.position.x, ghost.position.y)
+                if (bullet_pos - ghost_pos).length() < (bullet.radius + 16):
+                    self.ghosts.ghosts.remove(ghost)
+                    self.pacman.bullets.remove(bullet)
+                    break
+
         if self.flashBG:
             self.flashTimer += dt
             if self.flashTimer >= self.flashTime:
@@ -216,7 +234,7 @@ class GameController(object):
         self.powerup_timer += dt
         if self.powerup is None and self.powerup_timer >= self.powerup_interval:
                 # Elige aleatoriamente el tipo de PowerUp
-                powerup_classes = [PowerUp, LaserPowerUp]
+                powerup_classes = [PowerUp, LaserPowerUp,GunPowerUp]
                 PowerUpClass = random.choice(powerup_classes)
                 # Elige un nodo aleatorio del laberinto
                 all_nodes = list(self.nodes.nodesLUT.values())
@@ -232,6 +250,16 @@ class GameController(object):
 
         self.checkEvents()
         self.render()
+        #27/5 dario
+        for bullet in self.pacman.bullets[:]:
+            for ghost in self.ghosts.ghosts[:]:
+                # Convierte ambas posiciones a pygame.math.Vector2 usando x e y
+                bullet_pos = pygame.math.Vector2(bullet.position.x, bullet.position.y)
+                ghost_pos = pygame.math.Vector2(ghost.position.x, ghost.position.y)
+                if (bullet_pos - ghost_pos).length() < (bullet.radius + 16):
+                    self.ghosts.ghosts.remove(ghost)
+                    self.pacman.bullets.remove(bullet)
+                    break
     """ metodo checkEvents de la clase GameController.
         Verifica los eventos de entrada del usuario, como teclas presionadas y colisiones.
         Si se presiona la tecla ESPACIO, alterna entre pausar y reanudar el juego.
@@ -252,6 +280,20 @@ class GameController(object):
                         else:
                             self.textgroup.showText(PAUSETXT)
                             #self.hideEntities()
+
+                # --- Aquí va el disparo con letra f 27/5 dario ---
+                elif event.key == K_RIGHT and self.pacman.has_gun:
+                    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (1, 0))
+                    self.pacman.bullets.append(bullet)
+                elif event.key == K_LEFT and self.pacman.has_gun:
+                    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (-1, 0))
+                    self.pacman.bullets.append(bullet)
+                elif event.key == K_UP and self.pacman.has_gun:
+                    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (0, -1))
+                    self.pacman.bullets.append(bullet)
+                elif event.key == K_DOWN and self.pacman.has_gun:
+                    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (0, 1))
+                    self.pacman.bullets.append(bullet)
     """ metodo checkPelletEvents de la clase GameController.
         Verifica si Pacman ha comido un pellet y actualiza la puntuación.
         Si se ha comido un pellet, verifica si es un power pellet y actualiza el estado de los fantasmas.
@@ -427,12 +469,16 @@ class GameController(object):
             x = SCREENWIDTH - self.fruitCaptured[i].get_width() * (i+1)
             y = SCREENHEIGHT - self.fruitCaptured[i].get_height()
             self.screen.blit(self.fruitCaptured[i], (x, y))
+
+        #dibuja las balas 27/5 dario
+        for bullet in self.pacman.bullets:
+            bullet.draw(self.screen)
 #27-05
         if self.powerup is not None:
             self.powerup.render(self.screen)
 
         pygame.display.update()
-
+        
 """funcion de este if es ejecutar el juego.
     Crea una instancia de GameController y llama al método startGame.
     Luego, entra en un bucle infinito para actualizar el juego.

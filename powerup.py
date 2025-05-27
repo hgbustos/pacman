@@ -10,11 +10,10 @@ class PowerUp:
         self.color = (255, 255, 0)  # Amarillo
         self.position = pygame.math.Vector2(x, y)
         self.collideRadius = self.radius
-
+    
     def activate(self, pacman):
         self.active = True
         pacman.speed *= 3  # Duplica la velocidad de Pacman
-
     def deactivate(self, pacman):
         self.active = False
         pacman.speed /= 3  # Vuelve a la velocidad normal
@@ -34,7 +33,7 @@ class PowerUp:
          if not self.active:
             pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
 
-            
+
 class LaserPowerUp(PowerUp):
     def __init__(self, x, y, duration=5):
         super().__init__(x, y, duration)
@@ -54,3 +53,42 @@ class LaserPowerUp(PowerUp):
             self.duration -= dt
             if self.duration <= 0:
                 self.deactivate(pacman)
+
+#arma
+class GunPowerUp(PowerUp):
+    def __init__(self, x, y, duration=5):
+        super().__init__(x, y, duration)
+        self.color = (255, 0, 0)  # Rojo para distinguirlo
+
+    def activate(self, pacman):
+        self.active = True
+        pacman.has_gun = True
+        pacman.bullets = []  # Lista para almacenar balas
+
+    def deactivate(self, pacman):
+        self.active = False
+        pacman.has_gun = False
+        pacman.bullets = []
+
+    def update(self, pacman, dt):
+        if self.active:
+            self.duration -= dt
+            if self.duration <= 0:
+                self.deactivate(pacman)
+#balas
+class Bullet:
+    def __init__(self, x, y, direction, speed=400):
+        self.position = pygame.math.Vector2(x, y)
+        self.direction = pygame.math.Vector2(direction).normalize()
+        self.speed = speed
+        self.radius = 4
+        self.color = (255, 255, 255)
+
+    def update(self, dt):
+        self.position += self.direction * self.speed * dt
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.color, (int(self.position.x), int(self.position.y)), self.radius)
+
+
+
