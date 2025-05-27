@@ -11,6 +11,12 @@ from text import TextGroup
 from sprites import LifeSprites
 from sprites import MazeSprites
 from mazedata import MazeData
+
+#modificacion 27/5 dario
+#importacion de power up 
+from powerup import PowerUp,LaserPowerUp
+import random
+
 """ clase GameController
     Controlador principal del juego Pacman."""
 class GameController(object):
@@ -55,6 +61,15 @@ class GameController(object):
         self.fruitCaptured = []
         self.fruitNode = None
         self.mazedata = MazeData()
+
+
+
+
+        #modificacion 27/5 dario
+        self.powerup = None  # o una lista si habrá varios
+        self.powerup_timer = 0
+        self.powerup_interval = 10  # segundos entre apariciones de cada power up
+
     """ metodo setBackground de la clase GameController.
         Establece el fondo del juego, tanto el normal como el de parpadeo.
         Carga los sprites del laberinto y construye el fondo normal y de parpadeo.
@@ -111,6 +126,11 @@ class GameController(object):
         self.ghosts.inky.startNode.denyAccess(RIGHT, self.ghosts.inky)
         self.ghosts.clyde.startNode.denyAccess(LEFT, self.ghosts.clyde)
         self.mazedata.obj.denyGhostsAccess(self.ghosts, self.nodes)
+
+         #modificacion 27/5 dario
+        pacman_start = self.mazedata.obj.pacmanStart
+        node = self.nodes.getNodeFromTiles(*pacman_start)
+
     """ metodo startGame_old de la clase GameController.
         Inicia el juego cargando los datos del laberinto, creando los sprites y grupos de entidades,
         y configurando los nodos y accesos.
@@ -191,6 +211,25 @@ class GameController(object):
         afterPauseMethod = self.pause.update(dt)
         if afterPauseMethod is not None:
             afterPauseMethod()
+
+        # modificacion 27/5 dario
+        self.powerup_timer += dt
+        if self.powerup is None and self.powerup_timer >= self.powerup_interval:
+                # Elige aleatoriamente el tipo de PowerUp
+                powerup_classes = [PowerUp, LaserPowerUp]
+                PowerUpClass = random.choice(powerup_classes)
+                # Elige un nodo aleatorio del laberinto
+                all_nodes = list(self.nodes.nodesLUT.values())
+                random_node = random.choice(all_nodes)
+                self.powerup = PowerUpClass(random_node.position.x, random_node.position.y)
+                self.powerup_timer = 0
+        if self.powerup is not None and self.pacman.collideCheck(self.powerup):
+            self.powerup.activate(self.pacman)
+            self.powerup = None
+          #modificacion 27/5 dario
+        if self.powerup is not None:
+            self.powerup.update(self.pacman, dt)
+
         self.checkEvents()
         self.render()
     """ metodo checkEvents de la clase GameController.
@@ -388,6 +427,9 @@ class GameController(object):
             x = SCREENWIDTH - self.fruitCaptured[i].get_width() * (i+1)
             y = SCREENHEIGHT - self.fruitCaptured[i].get_height()
             self.screen.blit(self.fruitCaptured[i], (x, y))
+#27-05
+        if self.powerup is not None:
+            self.powerup.render(self.screen)
 
         pygame.display.update()
 
