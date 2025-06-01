@@ -68,7 +68,7 @@ class GameController(object):
         #modificacion 27/5 dario
         self.powerup = None  # o una lista si habrá varios
         self.powerup_timer = 0
-        self.powerup_interval = 10  # segundos entre apariciones de cada power up
+        self.powerup_interval = 3  # segundos entre apariciones de cada power up
 
     """ metodo setBackground de la clase GameController.
         Establece el fondo del juego, tanto el normal como el de parpadeo.
@@ -206,14 +206,19 @@ class GameController(object):
             if bullet.position.x < 0 or bullet.position.x > SCREENSIZE[0]:
                 self.pacman.bullets.remove(bullet)
             
-        #colision bala fantasma
+        #colision bala fantasma 
+        #TODO pacman.hasgun? anda re lento
         for bullet in self.pacman.bullets[:]:
             for ghost in self.ghosts.ghosts[:]:
                 # Convierte ghost.position a pygame.math.Vector2 usando sus componentes x e y
+                #TODO estos ya son vector2, no?
+                #TODO quizas bullet deberia ser una entity?
                 bullet_pos = pygame.math.Vector2(bullet.position.x, bullet.position.y)
                 ghost_pos = pygame.math.Vector2(ghost.position.x, ghost.position.y)
                 if (bullet_pos - ghost_pos).length() < (bullet.radius + 16):
-                    self.ghosts.ghosts.remove(ghost)
+                    ghost.startFreight() #los pone en freight...
+                    ghost.startSpawn() #... para inmediatamente ponerlos en spawn
+                    self.nodes.allowHomeAccess(ghost)#Permite que el fantasma entre al medio
                     self.pacman.bullets.remove(bullet)
                     break
 
@@ -250,16 +255,16 @@ class GameController(object):
 
         self.checkEvents()
         self.render()
-        #27/5 dario
-        for bullet in self.pacman.bullets[:]:
-            for ghost in self.ghosts.ghosts[:]:
-                # Convierte ambas posiciones a pygame.math.Vector2 usando x e y
-                bullet_pos = pygame.math.Vector2(bullet.position.x, bullet.position.y)
-                ghost_pos = pygame.math.Vector2(ghost.position.x, ghost.position.y)
-                if (bullet_pos - ghost_pos).length() < (bullet.radius + 16):
-                    self.ghosts.ghosts.remove(ghost)
-                    self.pacman.bullets.remove(bullet)
-                    break
+        #27/5 dario TODO esto estaba dos veces????
+        #for bullet in self.pacman.bullets[:]:
+        #    for ghost in self.ghosts.ghosts[:]:
+        #        # Convierte ambas posiciones a pygame.math.Vector2 usando x e y
+        #        bullet_pos = pygame.math.Vector2(bullet.position.x, bullet.position.y)
+        #        ghost_pos = pygame.math.Vector2(ghost.position.x, ghost.position.y)
+        #        if (bullet_pos - ghost_pos).length() < (bullet.radius + 16):
+        #            self.ghosts.ghosts.remove(ghost)
+        #            self.pacman.bullets.remove(bullet)
+        #            break
     """ metodo checkEvents de la clase GameController.
         Verifica los eventos de entrada del usuario, como teclas presionadas y colisiones.
         Si se presiona la tecla ESPACIO, alterna entre pausar y reanudar el juego.
@@ -336,7 +341,7 @@ class GameController(object):
                     self.ghosts.updatePoints()
                     self.pause.setPause(pauseTime=1, func=self.showEntities)
                     ghost.startSpawn()
-                    self.nodes.allowHomeAccess(ghost)
+                    self.nodes.allowHomeAccess(ghost) #TODO tarea de startSPawn? Raro
                 elif ghost.mode.current is not SPAWN:
                     if self.pacman.alive:
                         self.lives -=  1
