@@ -249,7 +249,7 @@ class GameController(object):
         if self.powerup is not None and self.pacman.collideCheck(self.powerup):
             self.powerup.activate(self.pacman)
             self.powerup = None
-          #modificacion 27/5 dario
+          #modificacion 27/5 dario TODO refactor
         if self.powerup is not None:
             self.powerup.update(self.pacman, dt)
 
