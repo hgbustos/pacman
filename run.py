@@ -11,12 +11,16 @@ from text import TextGroup
 from sprites import LifeSprites
 from sprites import MazeSprites
 from mazedata import MazeData
-
+from mainMenu import main_menu
+from mainMenu import game_over_menu
 #modificacion 27/5 dario
 #importacion de power up 
 from powerup import PowerUp,LaserPowerUp,GunPowerUp
 from powerup import Bullet
 import random
+
+
+
 
 """ clase GameController
     Controlador principal del juego Pacman."""
@@ -42,9 +46,8 @@ class GameController(object):
             fruitCaptured (list): Lista de frutas capturadas por el jugador.
             fruitNode (Node): Nodo donde se encuentra la fruta.
             mazedata (MazeData): Datos del laberinto."""
-    def __init__(self):
-        pygame.init()
-        self.screen = pygame.display.set_mode(SCREENSIZE, 0, 32)
+    def __init__(self,screen):
+        self.screen = screen
         self.background = None
         self.background_norm = None
         self.background_flash = None
@@ -326,12 +329,14 @@ class GameController(object):
             self: Instancia de la clase GameController.
         """
     def checkGhostEvents(self):
+        if self.pause.paused:
+            return  # No revises colisiones si está en pausa
         for ghost in self.ghosts:
             if self.pacman.collideGhost(ghost):
                 if ghost.mode.current is FREIGHT:
                     self.pacman.visible = False
                     ghost.visible = False
-                    self.updateScore(ghost.points)                  
+                    self.updateScore(ghost.points)
                     self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1)
                     self.ghosts.updatePoints()
                     self.pause.setPause(pauseTime=1, func=self.showEntities)
@@ -339,15 +344,35 @@ class GameController(object):
                     self.nodes.allowHomeAccess(ghost)
                 elif ghost.mode.current is not SPAWN:
                     if self.pacman.alive:
-                        self.lives -=  1
+                        self.lives -= 1
                         self.lifesprites.removeImage()
-                        self.pacman.die()               
+                        self.pacman.die()
                         self.ghosts.hide()
+                        import time
                         if self.lives <= 0:
                             self.textgroup.showText(GAMEOVERTXT)
-                            self.pause.setPause(pauseTime=3, func=self.restartGame)
+                            pygame.display.update()
+                            time.sleep(1)
+                            opcion = game_over_menu(self.screen)
+                            if opcion == "continue":
+                                self.restartGame()
+                                self.pause.setPause(pauseTime=2)  # Pausa 2 segundos para mostrar "READY"
+                            else:
+                                pygame.quit()
+                                exit()
                         else:
-                            self.pause.setPause(pauseTime=3, func=self.resetLevel)
+                           #self.textgroup.showText("¡Perdiste una vida!")
+                            self.textgroup.showText(READYTXT)
+                            pygame.display.update()
+                            time.sleep(1)
+                            opcion = game_over_menu(self.screen)
+                            if opcion == "continue":
+                                self.resetLevel()
+                                # Pausa el juego para que el jugador vea el mensaje READY
+                                self.pause.setPause(pauseTime=4)
+                            else:
+                                pygame.quit()
+                                exit()
     """ metodo checkFruitEvents de la clase GameController.
         Verifica si Pacman ha colisionado con la fruta y actualiza la puntuación.
         Si Pacman ha comido 50 o 140 pellets, genera una fruta en la posición correspondiente.
@@ -483,9 +508,13 @@ class GameController(object):
     Crea una instancia de GameController y llama al método startGame.
     Luego, entra en un bucle infinito para actualizar el juego.
     """
+
 if __name__ == "__main__":
-    game = GameController()
-    game.startGame()
+    pygame.init()
+    screen = pygame.display.set_mode(SCREENSIZE, 0, 32)
+    main_menu(screen)  # Pasa la ventana al menú
+    game = GameController(screen)  # Pasa la ventana al juego
+    game.startGame() 
     while True:
         game.update()
 
