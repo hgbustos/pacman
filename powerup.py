@@ -1,4 +1,5 @@
 import pygame
+from constants import *
 
 class PowerUp:
     def __init__(self, x, y, duration=5):
