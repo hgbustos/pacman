@@ -61,7 +61,7 @@ class LaserPowerUp(PowerUp):
 class GunPowerUp(PowerUp):
     def __init__(self, x, y, duration=5):
         super().__init__(x, y, duration)
-        self.color = RED  # Rojo para distinguirlo TODO definir colores en otro lado
+        self.color = RED  # Rojo para distinguirlo
 
     def activate(self, pacman):
         self.active = True

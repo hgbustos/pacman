@@ -71,6 +71,7 @@ class GameController(object):
         self.powerup_interval = 3  # segundos entre apariciones de cada power up
         #modificacion gabi
         self.bullets = []
+        self.current_powerup = None
 
     """ metodo setBackground de la clase GameController.
         Establece el fondo del juego, tanto el normal como el de parpadeo.
@@ -210,7 +211,7 @@ class GameController(object):
         #        self.pacman.bullets.remove(bullet)
             
         #colision bala fantasma 
-        #TODO pacman.hasgun? anda re lento TODO unificar update con colision DONE
+        #TODO unificar update con colision DONE
         #for bullet in self.pacman.bullets[:]:
         for bullet in self.bullets[:]:
             bullet.update(dt)
@@ -246,8 +247,9 @@ class GameController(object):
         # modificacion 27/5 dario
         self.powerup_timer += dt
         if self.powerup is None and self.powerup_timer >= self.powerup_interval:
-                # Elige aleatoriamente el tipo de PowerUp
-                powerup_classes = [PowerUp, LaserPowerUp,GunPowerUp]
+                # Elige aleatoriamente el tipo de PowerUp TODO borrado Laser hasta ser impl
+                #powerup_classes = [PowerUp, GunPowerUp]
+                powerup_classes = [PowerUp]
                 PowerUpClass = random.choice(powerup_classes)
                 # Elige un nodo aleatorio del laberinto
                 all_nodes = list(self.nodes.nodesLUT.values())
@@ -255,11 +257,12 @@ class GameController(object):
                 self.powerup = PowerUpClass(random_node.position.x, random_node.position.y)
                 self.powerup_timer = 0
         if self.powerup is not None and self.pacman.collideCheck(self.powerup):
-            self.powerup.activate(self.pacman)
+            self.current_powerup = self.powerup
+            self.current_powerup.activate(self.pacman)
             self.powerup = None
           #modificacion 27/5 dario TODO refactor
-        if self.powerup is not None:
-            self.powerup.update(self.pacman, dt)
+        if self.current_powerup is not None:
+            self.current_powerup.update(self.pacman, dt)
 
         self.checkEvents()
         self.render()
@@ -420,6 +423,9 @@ class GameController(object):
         self.level = 0
         self.pause.paused = True
         self.fruit = None
+        #GABI abajo
+        self.current_powerup = None
+        #GABI arriba
         self.startGame()
         self.score = 0
         self.textgroup.updateScore(self.score)
@@ -434,6 +440,9 @@ class GameController(object):
             self: Instancia de la clase GameController.
         """
     def resetLevel(self):
+        #GABI abajo
+        self.current_powerup = None
+        #GABI arriba
         self.pause.paused = True
         self.pacman.reset()
         self.ghosts.reset()
