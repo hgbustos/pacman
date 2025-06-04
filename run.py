@@ -248,10 +248,9 @@ class GameController(object):
         self.powerup_timer += dt
         if self.powerup is None and self.powerup_timer >= self.powerup_interval:
                 # Elige aleatoriamente el tipo de PowerUp TODO borrado Laser hasta ser impl
-                #powerup_classes = [PowerUp, GunPowerUp]
-                powerup_classes = [PowerUp]
+                powerup_classes = [PowerUp, GunPowerUp]
                 PowerUpClass = random.choice(powerup_classes)
-                # Elige un nodo aleatorio del laberinto
+                # Elige un nodo aleatorio del laberinto TODO No elegir los del medio
                 all_nodes = list(self.nodes.nodesLUT.values())
                 random_node = random.choice(all_nodes)
                 self.powerup = PowerUpClass(random_node.position.x, random_node.position.y)

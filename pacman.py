@@ -28,7 +28,7 @@ class Pacman(Entity):
         self.sprites = PacmanSprites(self)
         #27/05
         self.has_gun = False
-        self.bullets = []
+        #self.bullets = []
     
     """ Inicializa la posición y el radio de colisión del personaje. 
     al igual que la dirección inicial y el estado de vida.
