@@ -233,6 +233,17 @@ class GameController(object):
                     self.nodes.allowHomeAccess(ghost)#Permite que el fantasma entre al medio
                     self.bullets.remove(bullet)
                     break
+        # mod Joa 04/06
+        if self.pacman.has_laser:
+            for ghost in self.ghosts.ghosts[:]:
+                distance = abs(ghost.position.x - self.pacman.position.x) #mide la distancia entre Pacman y el fantasma
+                if distance < (ghost.collideRadius + LASERWIDTH/2): # si la distancia es menor que el radio de colision del fantasma mas el ancho del laser
+                    self.updateScore(ghost.points) # actualiza la puntuacion                 
+                   # self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1) # muestra el texto de la puntuacion
+                    self.ghosts.updatePoints() # actualiza los puntos de los fantasmas
+                    ghost.startFreight() # pone el fantasma en modo FREIGHT
+                    ghost.startSpawn() # pone el fantasma en modo SPAWN
+                    self.nodes.allowHomeAccess(ghost) # permite que el fantasma entre al medio
 
         if self.flashBG:
             self.flashTimer += dt
@@ -250,8 +261,8 @@ class GameController(object):
         # modificacion 27/5 dario
         self.powerup_timer += dt
         if self.powerup is None and self.powerup_timer >= self.powerup_interval:
-                # Elige aleatoriamente el tipo de PowerUp TODO borrado Laser hasta ser impl
-                powerup_classes = [PowerUp, GunPowerUp]
+                # Elige aleatoriamente el tipo de PowerUp TODO borrado Laser hasta ser impl DONE 
+                powerup_classes = [PowerUp, GunPowerUp, LaserPowerUp]
                 PowerUpClass = random.choice(powerup_classes)
                 # Elige un nodo aleatorio del laberinto TODO No elegir los del medio
                 all_nodes = list(self.nodes.nodesLUT.values())
@@ -508,7 +519,7 @@ class GameController(object):
 
         #dibuja las balas 27/5 dario
         for bullet in self.bullets:
-            bullet.draw(self.screen)
+            bullet.render(self.screen)
 #27-05
         if self.powerup is not None:
             self.powerup.render(self.screen)
