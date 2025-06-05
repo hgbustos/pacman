@@ -1,4 +1,6 @@
 import pygame
+from ghosts import GhostGroup 
+from ghosts import Ghost
 from constants import *
 
 class PowerUp:
@@ -8,35 +10,51 @@ class PowerUp:
         self.duration = duration
         self.active = False
         self.radius = 10  # Radio para dibujar el power-up (puedes cambiarlo)
-        self.color = YELLOW # Amarillo
+        self.color = (255, 255, 0)  # Amarillo
         self.position = pygame.math.Vector2(x, y)
         self.collideRadius = self.radius
     
-    #TODO un refactoring aca seguro
     def activate(self, pacman):
-        self.active = True
-        pacman.speed *= 3  # Duplica la velocidad de Pacman
+        pass # Método a ser implementado en las subclases
+    
     def deactivate(self, pacman):
-        self.active = False
-        pacman.speed /= 3  # Vuelve a la velocidad normal
+        pass # Método a ser implementado en las subclases
 
     def update(self, pacman, dt):
-        # Aquí puedes manejar el temporizador de duración si lo deseas
+        # Temporizador para el power-up
         if self.active:
             self.duration -= dt
             if self.duration <= 0:
                 self.deactivate(pacman)
 
-    #TODO Hacen lo mismo estos
-    def draw(self, screen):
+    def is_active(self):
+        return self.active
+
+    def render(self, screen):
         # Dibuja el power-up solo si no está activo (es decir, aún no lo ha recogido Pacman)
         if not self.active:
             pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
-    def render(self, screen):
-         if not self.active:
-            pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
 
 
+
+class SpeedBoostPowerUp(PowerUp):
+    def __init__(self, x, y, duration=5):
+        super().__init__(x, y, duration)
+        self.color = (255, 0, 255)  # Magenta para distinguirlo
+
+    def activate(self, pacman):
+        self.active = True
+        pacman.speed *= 2  # Duplica la velocidad de Pacman
+
+    def deactivate(self, pacman):
+        self.active = False
+        pacman.speed /= 2  # Vuelve a la velocidad normal
+
+    # update no es necesario hacer override porque no tiene lógica especial
+
+
+
+""" PowerUp que otorga a Pacman la capacidad de disparar un láser """
 class LaserPowerUp(PowerUp):
     def __init__(self, x, y, duration=5):
         super().__init__(x, y, duration)
@@ -44,24 +62,46 @@ class LaserPowerUp(PowerUp):
 
     def activate(self, pacman):
         self.active = True
-        # Efecto especial aquí
+        pacman.has_laser = True
 
     def deactivate(self, pacman):
         self.active = False
-        # Quitar efecto aquí
+        pacman.has_laser = False
 
     def update(self, pacman, dt):
-        # Igual que PowerUp, o tu lógica especial
         if self.active:
             self.duration -= dt
             if self.duration <= 0:
                 self.deactivate(pacman)
+  
+# update() no es necesario hacer override porque no tiene lógica especial 
 
+    def render(self, screen):
+        super().render(screen)
+        # dibujo del láser solo si está activo:
+        """if self.active: 
+            laserVertical = pygame.Rect(int(self.x - LASERWIDTH//2), 0, LASERWIDTH, SCREENHEIGHT)
+            pygame.draw.rect(screen, self.color, laserVertical)"""
+
+"""class FrontBeamPowerUp(PowerUp):
+    def __init__(self, x, y, duration=5):
+        super().__init__(x, y, duration)
+        self.color = (0, 0, 255)  # Azul para distinguirlo
+
+    def activate(self, pacman):
+        self.active = True
+        pacman.has_front_beam = True
+
+    def deactivate(self, pacman):
+        self.active = False
+        pacman.has_front_beam = False
+
+    # update no es necesario hacer override porque no tiene lógica especial"""
 #arma
 class GunPowerUp(PowerUp):
     def __init__(self, x, y, duration=5):
         super().__init__(x, y, duration)
-        self.color = RED  # Rojo para distinguirlo
+        self.color = (255, 0, 0)  # Rojo para distinguirlo
 
     def activate(self, pacman):
         self.active = True
@@ -85,12 +125,12 @@ class Bullet:
         self.direction = pygame.math.Vector2(direction).normalize()
         self.speed = speed
         self.radius = 4
-        self.color = WHITE
+        self.color = (255, 255, 255)
 
     def update(self, dt):
         self.position += self.direction * self.speed * dt
 
-    def draw(self, screen):
+    def render(self, screen):
         pygame.draw.circle(screen, self.color, (int(self.position.x), int(self.position.y)), self.radius)
 
 

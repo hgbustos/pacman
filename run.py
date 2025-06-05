@@ -15,7 +15,7 @@ from mainMenu import main_menu
 from mainMenu import game_over_menu
 #modificacion 27/5 dario
 #importacion de power up 
-from powerup import PowerUp,LaserPowerUp,GunPowerUp
+from powerup import PowerUp,LaserPowerUp,GunPowerUp, SpeedBoostPowerUp
 from powerup import Bullet
 import random
 
@@ -233,6 +233,17 @@ class GameController(object):
                     self.nodes.allowHomeAccess(ghost)#Permite que el fantasma entre al medio
                     self.bullets.remove(bullet)
                     break
+        # mod Joa 04/06
+        if self.pacman.has_laser:
+            for ghost in self.ghosts.ghosts[:]:
+                distance = abs(ghost.position.x - self.pacman.position.x) #mide la distancia entre Pacman y el fantasma
+                if distance < (ghost.collideRadius + LASERWIDTH/2): # si la distancia es menor que el radio de colision del fantasma mas el ancho del laser
+                    self.updateScore(ghost.points) # actualiza la puntuacion                 
+                   # self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1) # muestra el texto de la puntuacion
+                    self.ghosts.updatePoints() # actualiza los puntos de los fantasmas
+                    ghost.startFreight() # pone el fantasma en modo FREIGHT
+                    ghost.startSpawn() # pone el fantasma en modo SPAWN
+                    self.nodes.allowHomeAccess(ghost) # permite que el fantasma entre al medio
 
         if self.flashBG:
             self.flashTimer += dt
@@ -250,21 +261,26 @@ class GameController(object):
         # modificacion 27/5 dario
         self.powerup_timer += dt
         if self.powerup is None and self.powerup_timer >= self.powerup_interval:
-                # Elige aleatoriamente el tipo de PowerUp TODO borrado Laser hasta ser impl
-                powerup_classes = [PowerUp, GunPowerUp]
-                PowerUpClass = random.choice(powerup_classes)
-                # Elige un nodo aleatorio del laberinto TODO No elegir los del medio
-                all_nodes = list(self.nodes.nodesLUT.values())
-                random_node = random.choice(all_nodes)
-                self.powerup = PowerUpClass(random_node.position.x, random_node.position.y)
-                self.powerup_timer = 0
+            powerup_classes = [SpeedBoostPowerUp, GunPowerUp, LaserPowerUp]
+            PowerUpClass = random.choice(powerup_classes)
+            # Solo elige posiciones donde hay pellets
+            if len(self.pellets.pelletList) > 0:
+                pellet = random.choice(self.pellets.pelletList)
+                self.powerup = PowerUpClass(pellet.position.x, pellet.position.y)
+                self.powerup_timer = 0  # Solo esto, elimina la otra línea
+
         if self.powerup is not None and self.pacman.collideCheck(self.powerup):
+            # Si hay un power up activo, desactívalo antes de activar el nuevo
+            if self.current_powerup is not None:
+                self.current_powerup.deactivate(self.pacman)
             self.current_powerup = self.powerup
             self.current_powerup.activate(self.pacman)
             self.powerup = None
-          #modificacion 27/5 dario TODO refactor
+
         if self.current_powerup is not None:
             self.current_powerup.update(self.pacman, dt)
+            if not self.current_powerup.active:
+                self.current_powerup = None
 
         self.checkEvents()
         self.render()
@@ -447,9 +463,10 @@ class GameController(object):
         self.level = 0
         self.pause.paused = True
         self.fruit = None
-        #GABI abajo
-        self.current_powerup = None
-        #GABI arriba
+        # Desactiva el power up si está activo
+        if self.current_powerup is not None:
+            self.current_powerup.deactivate(self.pacman)
+            self.current_powerup = None
         self.startGame()
         self.score = 0
         self.textgroup.updateScore(self.score)
@@ -465,7 +482,9 @@ class GameController(object):
         """
     def resetLevel(self):
         #GABI abajo
-        self.current_powerup = None
+        if self.current_powerup is not None:
+            self.current_powerup.deactivate(self.pacman)
+            self.current_powerup = None
         #GABI arriba
         self.pause.paused = True
         self.pacman.reset()
@@ -508,7 +527,7 @@ class GameController(object):
 
         #dibuja las balas 27/5 dario
         for bullet in self.bullets:
-            bullet.draw(self.screen)
+            bullet.render(self.screen)
 #27-05
         if self.powerup is not None:
             self.powerup.render(self.screen)

@@ -26,8 +26,12 @@ class Pacman(Entity):
         self.setBetweenNodes(LEFT)
         self.alive = True
         self.sprites = PacmanSprites(self)
+        
         #27/05
         self.has_gun = False
+        #mod Joa 
+        self.has_laser = False
+        self.has_front_beam = False
         #self.bullets = []
     
     """ Inicializa la posición y el radio de colisión del personaje. 
@@ -164,3 +168,7 @@ class Pacman(Entity):
         # Dibuja el arma si la tiene
         if self.has_gun:
             pygame.draw.rect(screen, (150, 150, 150), (self.position.x-5, self.position.y-20, 10, 15))
+        # Dibuja el laser
+        if self.has_laser:
+            laserVertical = pygame.Rect(int(self.position.x - LASERWIDTH//2), 0, LASERWIDTH, SCREENHEIGHT)
+            pygame.draw.rect(screen, (0, 255, 0), laserVertical)
