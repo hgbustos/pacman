@@ -15,7 +15,7 @@ from mainMenu import main_menu
 from mainMenu import game_over_menu
 #modificacion 27/5 dario
 #importacion de power up 
-from powerup import PowerUp,LaserPowerUp,GunPowerUp
+from powerup import PowerUp,LaserPowerUp,GunPowerUp, SpeedBoostPowerUp
 from powerup import Bullet
 import random
 
@@ -262,7 +262,7 @@ class GameController(object):
         self.powerup_timer += dt
         if self.powerup is None and self.powerup_timer >= self.powerup_interval:
                 # Elige aleatoriamente el tipo de PowerUp TODO borrado Laser hasta ser impl DONE 
-                powerup_classes = [PowerUp, GunPowerUp, LaserPowerUp]
+                powerup_classes = [SpeedBoostPowerUp, GunPowerUp, LaserPowerUp]
                 PowerUpClass = random.choice(powerup_classes)
                 # Elige un nodo aleatorio del laberinto TODO No elegir los del medio
                 all_nodes = list(self.nodes.nodesLUT.values())
@@ -476,7 +476,9 @@ class GameController(object):
         """
     def resetLevel(self):
         #GABI abajo
-        self.current_powerup = None
+        if self.current_powerup is not None:
+            self.current_powerup.deactivate(self.pacman)
+            self.current_powerup = None
         #GABI arriba
         self.pause.paused = True
         self.pacman.reset()
