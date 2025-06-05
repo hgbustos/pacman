@@ -1,5 +1,7 @@
 import pygame
 from constants import *
+#GABI
+from entity import *
 
 class PowerUp:
     def __init__(self, x, y, duration=5):
@@ -20,7 +22,7 @@ class PowerUp:
         self.active = False
         pacman.speed /= 3  # Vuelve a la velocidad normal
 
-    def update(self, pacman, dt):
+def update(self, pacman, dt):
         # Aquí puedes manejar el temporizador de duración si lo deseas
         if self.active:
             self.duration -= dt
@@ -93,5 +95,6 @@ class Bullet:
     def draw(self, screen):
         pygame.draw.circle(screen, self.color, (int(self.position.x), int(self.position.y)), self.radius)
 
-
+#class Bullet2(Entity):
+#    def __init__(self, node):
 

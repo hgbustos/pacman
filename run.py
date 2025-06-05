@@ -45,7 +45,11 @@ class GameController(object):
             flashTimer (float): Temporizador para controlar el parpadeo del fondo.
             fruitCaptured (list): Lista de frutas capturadas por el jugador.
             fruitNode (Node): Nodo donde se encuentra la fruta.
-            mazedata (MazeData): Datos del laberinto."""
+            mazedata (MazeData): Datos del laberinto.
+            powerup (PowerUp): PowerUp actualmente en el mapa.
+            current_powerup (PowerUp): PowerUp actualmente activo. 
+            bullets (Bullet) : Balas viajando por el mapa.
+            """
     def __init__(self,screen):
         self.screen = screen
         self.background = None
@@ -448,7 +452,9 @@ class GameController(object):
         self.pause.paused = True
         self.fruit = None
         #GABI abajo
-        self.current_powerup = None
+        if self.current_powerup is not None:
+            self.current_powerup.deactivate()
+            self.current_powerup = None
         #GABI arriba
         self.startGame()
         self.score = 0
@@ -465,7 +471,9 @@ class GameController(object):
         """
     def resetLevel(self):
         #GABI abajo
-        self.current_powerup = None
+        if self.current_powerup is not None:
+            self.current_powerup.deactivate()
+            self.current_powerup = None
         #GABI arriba
         self.pause.paused = True
         self.pacman.reset()
