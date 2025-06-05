@@ -249,22 +249,26 @@ class GameController(object):
 
         # modificacion 27/5 dario
         self.powerup_timer += dt
-        if self.powerup is None and self.powerup_timer >= self.powerup_interval:
-                # Elige aleatoriamente el tipo de PowerUp TODO borrado Laser hasta ser impl
-                powerup_classes = [PowerUp, GunPowerUp]
-                PowerUpClass = random.choice(powerup_classes)
-                # Elige un nodo aleatorio del laberinto TODO No elegir los del medio
-                all_nodes = list(self.nodes.nodesLUT.values())
-                random_node = random.choice(all_nodes)
-                self.powerup = PowerUpClass(random_node.position.x, random_node.position.y)
+
+        # Solo permite un power up a la vez
+        if self.powerup is None and self.current_powerup is None and self.powerup_timer >= self.powerup_interval:
+            powerup_classes = [PowerUp, GunPowerUp]
+            PowerUpClass = random.choice(powerup_classes)
+            if len(self.pellets.pelletList) > 0:
+                pellet = random.choice(self.pellets.pelletList)
+                self.powerup = PowerUpClass(pellet.position.x, pellet.position.y)
                 self.powerup_timer = 0
+
         if self.powerup is not None and self.pacman.collideCheck(self.powerup):
             self.current_powerup = self.powerup
             self.current_powerup.activate(self.pacman)
             self.powerup = None
-          #modificacion 27/5 dario TODO refactor
+
         if self.current_powerup is not None:
             self.current_powerup.update(self.pacman, dt)
+            # Si el power up terminó, lo eliminamos
+            if not self.current_powerup.active:
+                self.current_powerup = None
 
         self.checkEvents()
         self.render()
@@ -447,9 +451,10 @@ class GameController(object):
         self.level = 0
         self.pause.paused = True
         self.fruit = None
-        #GABI abajo
-        self.current_powerup = None
-        #GABI arriba
+        # Desactiva el power up si está activo
+        if self.current_powerup is not None:
+            self.current_powerup.deactivate(self.pacman)
+            self.current_powerup = None
         self.startGame()
         self.score = 0
         self.textgroup.updateScore(self.score)
@@ -464,9 +469,10 @@ class GameController(object):
             self: Instancia de la clase GameController.
         """
     def resetLevel(self):
-        #GABI abajo
-        self.current_powerup = None
-        #GABI arriba
+        # Desactiva el power up si está activo
+        if self.current_powerup is not None:
+            self.current_powerup.deactivate(self.pacman)
+            self.current_powerup = None
         self.pause.paused = True
         self.pacman.reset()
         self.ghosts.reset()

@@ -7,21 +7,29 @@ class PowerUp:
         self.y = y
         self.duration = duration
         self.active = False
-        self.radius = 10  # Radio para dibujar el power-up (puedes cambiarlo)
-        self.color = YELLOW # Amarillo
+        self.radius = 10
+        self.color = YELLOW
         self.position = pygame.math.Vector2(x, y)
         self.collideRadius = self.radius
-    
-    #TODO un refactoring aca seguro
+        self._effect_active = False
+        self._original_speed = None  # Guarda la velocidad original
+
     def activate(self, pacman):
         self.active = True
-        pacman.speed *= 3  # Duplica la velocidad de Pacman
+        if not self._effect_active:
+            self._original_speed = pacman.speed
+            pacman.speed = self._original_speed * 3
+            self._effect_active = True
+        self.duration = 5  # Reinicia la duración
+
     def deactivate(self, pacman):
         self.active = False
-        pacman.speed /= 3  # Vuelve a la velocidad normal
+        if self._effect_active and self._original_speed is not None:
+            pacman.speed = self._original_speed
+            self._effect_active = False
+            self._original_speed = None
 
     def update(self, pacman, dt):
-        # Aquí puedes manejar el temporizador de duración si lo deseas
         if self.active:
             self.duration -= dt
             if self.duration <= 0:
