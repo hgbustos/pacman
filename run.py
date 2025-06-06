@@ -224,6 +224,10 @@ class GameController(object):
             for ghost in self.ghosts.ghosts[:]:
                 if (bullet.position - ghost.position).magnitude() < (bullet.radius + 16):
                     ghost.startFreight() #los pone en freight...
+                    self.updateScore(ghost.points)
+                    #Puntos. Mejor solo dar cuando pacman come a los fantasmas
+                    #self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1)
+                    #self.ghosts.updatePoints()
                     ghost.startSpawn() #... para inmediatamente ponerlos en spawn
                     self.nodes.allowHomeAccess(ghost)#Permite que el fantasma entre al medio
                     self.bullets.remove(bullet)
@@ -246,7 +250,7 @@ class GameController(object):
         self.powerup_timer += dt
         if self.powerup is None and self.powerup_timer >= self.powerup_interval:
                 # Elige aleatoriamente el tipo de PowerUp TODO borrado Laser hasta ser impl
-                powerup_classes = [GunPowerUp]
+                powerup_classes = [GunPowerUp, PowerUp]
                 PowerUpClass = random.choice(powerup_classes)
                 # Elige un nodo aleatorio del laberinto TODO No elegir los del medio
                 all_nodes = list(self.nodes.nodesLUT.values())
@@ -284,7 +288,7 @@ class GameController(object):
                             self.textgroup.showText(PAUSETXT)
                             #self.hideEntities()
 
-                elif event.key == K_f and self.current_powerup.name == GUN:
+                elif event.key == K_f and self.current_powerup is not None and self.current_powerup.name == GUN:
                     bullet = Bullet2(self.pacman)
                     self.bullets.append(bullet)
     """ metodo checkPelletEvents de la clase GameController.
