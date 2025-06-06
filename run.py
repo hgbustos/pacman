@@ -440,6 +440,7 @@ class GameController(object):
         if self.current_powerup is not None:
             self.current_powerup.deactivate(self.pacman)
             self.current_powerup = None
+        self.bullets.clear()
         #GABI arriba
         self.startGame()
         self.score = 0
@@ -459,6 +460,7 @@ class GameController(object):
         if self.current_powerup is not None:
             self.current_powerup.deactivate(self.pacman)
             self.current_powerup = None
+        self.bullets.clear()
         #GABI arriba
         self.pause.paused = True
         self.pacman.reset()
