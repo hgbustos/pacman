@@ -16,8 +16,9 @@ from mainMenu import game_over_menu
 #modificacion 27/5 dario
 #importacion de power up 
 from powerup import PowerUp,LaserPowerUp,GunPowerUp
-from powerup import Bullet
+from powerup import Bullet, Bullet2
 import random
+from vector import Vector2
 
 
 
@@ -222,16 +223,22 @@ class GameController(object):
         #for bullet in self.pacman.bullets[:]:
         for bullet in self.bullets[:]:
             bullet.update(dt)
+            #Chequea si la bala esta inactiva
+            if bullet.active == False: 
+                self.bullets.pop()
+                continue
             # Elimina la bala si sale de la pantalla
-            if bullet.position.x < 0 or bullet.position.x > SCREENSIZE[0]:
-                self.bullets.remove(bullet)
+            #if bullet.position.x < 0 or bullet.position.x > SCREENSIZE[0]:
+            #    self.bullets.remove(bullet)
             for ghost in self.ghosts.ghosts[:]:
                 # Convierte ghost.position a pygame.math.Vector2 usando sus componentes x e y
                 #TODO estos ya son vector2, no?
                 #TODO quizas bullet deberia ser una entity?
-                bullet_pos = pygame.math.Vector2(bullet.position.x, bullet.position.y)
-                ghost_pos = pygame.math.Vector2(ghost.position.x, ghost.position.y)
-                if (bullet_pos - ghost_pos).length() < (bullet.radius + 16):
+                #bullet_pos = pygame.math.Vector2(bullet.position.x, bullet.position.y)
+                #ghost_pos = pygame.math.Vector2(ghost.position.x, ghost.position.y)
+                bullet_pos = bullet.position
+                ghost_pos = ghost.position
+                if (bullet_pos - ghost_pos).magnitude() < (bullet.radius + 16):
                     ghost.startFreight() #los pone en freight...
                     ghost.startSpawn() #... para inmediatamente ponerlos en spawn
                     self.nodes.allowHomeAccess(ghost)#Permite que el fantasma entre al medio
@@ -255,7 +262,7 @@ class GameController(object):
         self.powerup_timer += dt
         if self.powerup is None and self.powerup_timer >= self.powerup_interval:
                 # Elige aleatoriamente el tipo de PowerUp TODO borrado Laser hasta ser impl
-                powerup_classes = [PowerUp, GunPowerUp]
+                powerup_classes = [GunPowerUp]
                 PowerUpClass = random.choice(powerup_classes)
                 # Elige un nodo aleatorio del laberinto TODO No elegir los del medio
                 all_nodes = list(self.nodes.nodesLUT.values())
@@ -294,17 +301,33 @@ class GameController(object):
                             #self.hideEntities()
 
                 # --- Aquí va el disparo con letra f 27/5 dario ---
-                elif event.key == K_RIGHT and self.pacman.has_gun:
-                    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (1, 0))
-                    self.bullets.append(bullet)
-                elif event.key == K_LEFT and self.pacman.has_gun:
-                    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (-1, 0))
-                    self.bullets.append(bullet)
-                elif event.key == K_UP and self.pacman.has_gun:
-                    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (0, -1))
-                    self.bullets.append(bullet)
-                elif event.key == K_DOWN and self.pacman.has_gun:
-                    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (0, 1))
+                #elif event.key == K_RIGHT and self.pacman.has_gun:
+                #    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (1, 0))
+                #    self.bullets.append(bullet)
+                #elif event.key == K_LEFT and self.pacman.has_gun:
+                #    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (-1, 0))
+                #    self.bullets.append(bullet)
+                #elif event.key == K_UP and self.pacman.has_gun:
+                #    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (0, -1))
+                #    self.bullets.append(bullet)
+                #elif event.key == K_DOWN and self.pacman.has_gun:
+                #    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (0, 1))
+                #    self.bullets.append(bullet)
+
+                #elif event.key == K_RIGHT and self.pacman.has_gun:
+                #    bullet = Bullet2(self.pacman)
+                #    self.bullets.append(bullet)
+                #elif event.key == K_LEFT and self.pacman.has_gun:
+                #    bullet = Bullet2(self.pacman)
+                #    self.bullets.append(bullet)
+                #elif event.key == K_UP and self.pacman.has_gun:
+                #    bullet = Bullet2(self.pacman)
+                #    self.bullets.append(bullet)
+                #elif event.key == K_DOWN and self.pacman.has_gun:
+                #    bullet = Bullet2(self.pacman)
+                #    self.bullets.append(bullet)
+                elif event.key == K_f and self.pacman.has_gun:
+                    bullet = Bullet2(self.pacman)
                     self.bullets.append(bullet)
     """ metodo checkPelletEvents de la clase GameController.
         Verifica si Pacman ha comido un pellet y actualiza la puntuación.

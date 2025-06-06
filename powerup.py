@@ -22,7 +22,7 @@ class PowerUp:
         self.active = False
         pacman.speed /= 3  # Vuelve a la velocidad normal
 
-def update(self, pacman, dt):
+    def update(self, pacman, dt):
         # Aquí puedes manejar el temporizador de duración si lo deseas
         if self.active:
             self.duration -= dt
@@ -64,6 +64,8 @@ class GunPowerUp(PowerUp):
     def __init__(self, x, y, duration=5):
         super().__init__(x, y, duration)
         self.color = RED  # Rojo para distinguirlo
+        #GABI
+        self.duration = 60
 
     def activate(self, pacman):
         self.active = True
@@ -95,6 +97,46 @@ class Bullet:
     def draw(self, screen):
         pygame.draw.circle(screen, self.color, (int(self.position.x), int(self.position.y)), self.radius)
 
-#class Bullet2(Entity):
-#    def __init__(self, node):
+class Bullet2(Entity):
+    def __init__(self, pacman):
+        Entity.__init__(self, pacman.node)
+        self.direction = pacman.direction
+        self.position = pacman.position
+        self.target = pacman.target
+        self.radius = 4
+        self.color = PINK
+        self.setSpeed(BULLET_SPEED)
+        self.active = True
+        self.name = BULLET
+    
+    def update(self, dt):
+        #self.position += self.direction*self.speed*dt
+        self.position += self.directions[self.direction]*self.speed*dt
+        if self.overshotTarget():
+            self.node = self.target
+            if self.node.neighbors[PORTAL] is not None: #balas siempre portal enabled
+                self.node = self.node.neighbors[PORTAL]
+
+            self.target = self.getNewTarget(self.direction)
+            if self.target is not self.node:
+                self.direction = self.direction
+            else:
+                self.visible = False
+                #self.active = False
+                #self.direction = self.getNewTarget(self.direction)
+            self.setPosition()
+
+    def getNewTarget(self, direction):
+        if self.validDirection(self.direction):
+            return self.node.neighbors[self.direction]
+        else:
+            self.active = False
+            self.visible = False
+            return self.node
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.color, (int(self.position.x), int(self.position.y)), self.radius)
+
+
+
 

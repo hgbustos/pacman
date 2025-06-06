@@ -4,6 +4,7 @@
 
 + [FIXED] Morir con el poder de velocidad a veces hace respawnear con un pacman lento
 + [OPEN] Los powerups aparecen en los nodos del medio, donde pacman no puede pasar
++ [OPEN] A veces no se puede disparar cuando se está en un nodo
 
 ## TODO
 
