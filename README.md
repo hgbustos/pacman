@@ -10,7 +10,8 @@
 
 + Pacman no deberia tener hasgun, probablemente. GameController dibuja el "armita" y maneja los tiros
 + Arma: duración a base de timer o con un cartucho? Disparo continuo o con presionar un botón?
-
++ Matar con arma no suma puntos
++ Balas persistentes en las paredes (cuando quedan en un nodo final)
 
 ## Ideas
 

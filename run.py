@@ -211,34 +211,18 @@ class GameController(object):
         else:
             self.pacman.update(dt)
 
-            #arma 27/5 dario
-        #for bullet in self.pacman.bullets[:]:
-        #    bullet.update(dt)
-        #    # Elimina la bala si sale de la pantalla
-        #    if bullet.position.x < 0 or bullet.position.x > SCREENSIZE[0]:
-        #        self.pacman.bullets.remove(bullet)
-            
-        #colision bala fantasma 
-        #TODO unificar update con colision DONE
-        #for bullet in self.pacman.bullets[:]:
+        #TODO esto, junto con la deteccion del laser y la bomba, deberian ir en checkGhostEvents
         for bullet in self.bullets[:]:
             bullet.update(dt)
-            #Chequea si la bala esta inactiva
-            if bullet.active == False: 
-                self.bullets.pop()
+            #Chequea si la bala esta inactiva, i.e. si no es visible
+            if bullet.visible == False: 
+                self.bullets.remove(bullet)
                 continue
-            # Elimina la bala si sale de la pantalla
+            # Elimina la bala si sale de la pantalla -- No necesario, la bala no pasa de un nodo
             #if bullet.position.x < 0 or bullet.position.x > SCREENSIZE[0]:
             #    self.bullets.remove(bullet)
             for ghost in self.ghosts.ghosts[:]:
-                # Convierte ghost.position a pygame.math.Vector2 usando sus componentes x e y
-                #TODO estos ya son vector2, no?
-                #TODO quizas bullet deberia ser una entity?
-                #bullet_pos = pygame.math.Vector2(bullet.position.x, bullet.position.y)
-                #ghost_pos = pygame.math.Vector2(ghost.position.x, ghost.position.y)
-                bullet_pos = bullet.position
-                ghost_pos = ghost.position
-                if (bullet_pos - ghost_pos).magnitude() < (bullet.radius + 16):
+                if (bullet.position - ghost.position).magnitude() < (bullet.radius + 16):
                     ghost.startFreight() #los pone en freight...
                     ghost.startSpawn() #... para inmediatamente ponerlos en spawn
                     self.nodes.allowHomeAccess(ghost)#Permite que el fantasma entre al medio
@@ -300,33 +284,7 @@ class GameController(object):
                             self.textgroup.showText(PAUSETXT)
                             #self.hideEntities()
 
-                # --- Aquí va el disparo con letra f 27/5 dario ---
-                #elif event.key == K_RIGHT and self.pacman.has_gun:
-                #    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (1, 0))
-                #    self.bullets.append(bullet)
-                #elif event.key == K_LEFT and self.pacman.has_gun:
-                #    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (-1, 0))
-                #    self.bullets.append(bullet)
-                #elif event.key == K_UP and self.pacman.has_gun:
-                #    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (0, -1))
-                #    self.bullets.append(bullet)
-                #elif event.key == K_DOWN and self.pacman.has_gun:
-                #    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (0, 1))
-                #    self.bullets.append(bullet)
-
-                #elif event.key == K_RIGHT and self.pacman.has_gun:
-                #    bullet = Bullet2(self.pacman)
-                #    self.bullets.append(bullet)
-                #elif event.key == K_LEFT and self.pacman.has_gun:
-                #    bullet = Bullet2(self.pacman)
-                #    self.bullets.append(bullet)
-                #elif event.key == K_UP and self.pacman.has_gun:
-                #    bullet = Bullet2(self.pacman)
-                #    self.bullets.append(bullet)
-                #elif event.key == K_DOWN and self.pacman.has_gun:
-                #    bullet = Bullet2(self.pacman)
-                #    self.bullets.append(bullet)
-                elif event.key == K_f and self.pacman.has_gun:
+                elif event.key == K_f and self.current_powerup.name == GUN:
                     bullet = Bullet2(self.pacman)
                     self.bullets.append(bullet)
     """ metodo checkPelletEvents de la clase GameController.
@@ -476,7 +434,7 @@ class GameController(object):
         self.fruit = None
         #GABI abajo
         if self.current_powerup is not None:
-            self.current_powerup.deactivate()
+            self.current_powerup.deactivate(self.pacman)
             self.current_powerup = None
         #GABI arriba
         self.startGame()
@@ -495,7 +453,7 @@ class GameController(object):
     def resetLevel(self):
         #GABI abajo
         if self.current_powerup is not None:
-            self.current_powerup.deactivate()
+            self.current_powerup.deactivate(self.pacman)
             self.current_powerup = None
         #GABI arriba
         self.pause.paused = True

@@ -13,6 +13,7 @@ class PowerUp:
         self.color = YELLOW # Amarillo
         self.position = pygame.math.Vector2(x, y)
         self.collideRadius = self.radius
+        self.name = DEFAULT
     
     #TODO un refactoring aca seguro
     def activate(self, pacman):
@@ -43,6 +44,7 @@ class LaserPowerUp(PowerUp):
     def __init__(self, x, y, duration=5):
         super().__init__(x, y, duration)
         self.color = CYAN  # Cian
+        self.name = LASER
 
     def activate(self, pacman):
         self.active = True
@@ -66,16 +68,13 @@ class GunPowerUp(PowerUp):
         self.color = RED  # Rojo para distinguirlo
         #GABI
         self.duration = 60
+        self.name = GUN
 
     def activate(self, pacman):
         self.active = True
-        pacman.has_gun = True
-        pacman.bullets = []  # Lista para almacenar balas
 
     def deactivate(self, pacman):
         self.active = False
-        pacman.has_gun = False
-        pacman.bullets = []
 
     def update(self, pacman, dt):
         if self.active:
@@ -106,7 +105,7 @@ class Bullet2(Entity):
         self.radius = 4
         self.color = PINK
         self.setSpeed(BULLET_SPEED)
-        self.active = True
+        self.stuck = False
         self.name = BULLET
     
     def update(self, dt):
@@ -122,7 +121,6 @@ class Bullet2(Entity):
                 self.direction = self.direction
             else:
                 self.visible = False
-                #self.active = False
                 #self.direction = self.getNewTarget(self.direction)
             self.setPosition()
 
@@ -130,8 +128,6 @@ class Bullet2(Entity):
         if self.validDirection(self.direction):
             return self.node.neighbors[self.direction]
         else:
-            self.active = False
-            self.visible = False
             return self.node
 
     def draw(self, screen):
