@@ -4,7 +4,7 @@ on:
   #push:
     #branches: [ main ]
   pull_request:
-    branches: [ feature_test ]
+    branches: ["*"]
 
 jobs:
   test:
