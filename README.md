@@ -21,3 +21,13 @@ Volver a poner todos los powerups como spawneables antes de pedir merge!!!!
 ## Ideas
 
 + CheckPowerupEvents(), PowerupGroup? Siguiendo la línea de lo ya escrito
++ dt como atributo del ghostsubject
+
+
+
+## ACTUAL
+
++ GhostSubject solo envia cambios de estado. NO ACTUALIZA LOS FANTASMAS (Por ahora???)
++ [DONE] Fantasmas rapidazos
++ [DONE] Modificar sprites 
++ FRIGHTENED ghosts can enter HOME
