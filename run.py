@@ -4,7 +4,8 @@ from constants import *
 from pacman import Pacman
 from nodes import NodeGroup
 from pellets import PelletGroup
-from ghosts import GhostGroup
+#from ghosts import GhostGroup, GhostGroup2 TODO GABI
+from ghosts import *
 from fruit import Fruit
 from pauser import Pause
 from text import TextGroup
@@ -16,8 +17,9 @@ from mainMenu import game_over_menu
 #modificacion 27/5 dario
 #importacion de power up 
 from powerup import PowerUp,LaserPowerUp,GunPowerUp, SpeedBoostPowerUp
-from powerup import Bullet
+from powerup import Bullet, Bullet2
 import random
+from vector import Vector2
 
 pygame.init()
 #configuracion de sonidos
@@ -60,7 +62,11 @@ class GameController(object):
             flashTimer (float): Temporizador para controlar el parpadeo del fondo.
             fruitCaptured (list): Lista de frutas capturadas por el jugador.
             fruitNode (Node): Nodo donde se encuentra la fruta.
-            mazedata (MazeData): Datos del laberinto."""
+            mazedata (MazeData): Datos del laberinto.
+            powerup (PowerUp): PowerUp actualmente en el mapa.
+            current_powerup (PowerUp): PowerUp actualmente activo. 
+            bullets (Bullet) : Balas viajando por el mapa.
+            """
     def __init__(self,screen):
         self.screen = screen
         self.background = None
@@ -133,7 +139,22 @@ class GameController(object):
         self.mazedata.obj.connectHomeNodes(self.nodes)
         self.pacman = Pacman(self.nodes.getNodeFromTiles(*self.mazedata.obj.pacmanStart))
         self.pellets = PelletGroup(self.mazedata.obj.name+".txt")
-        self.ghosts = GhostGroup(self.nodes.getStartTempNode(), self.pacman)
+
+        tempNode = self.nodes.getStartTempNode()#TODO
+        self.ghosts = GhostGroup2()
+        #TODO GABI - Crear fantasmas uno por uno
+        #blinky
+        self.ghosts.blinky = Blinky(tempNode,self.pacman, self.ghosts)
+        self.ghosts.blinky.subscribe()
+        #pinky
+        self.ghosts.pinky = Pinky(tempNode,self.pacman, self.ghosts)
+        self.ghosts.pinky.subscribe()
+        #inky
+        self.ghosts.inky = Inky(tempNode,self.pacman, self.ghosts, self.ghosts.blinky)
+        self.ghosts.inky.subscribe()
+        #clyde
+        self.ghosts.clyde = Clyde(tempNode,self.pacman, self.ghosts)
+        self.ghosts.clyde.subscribe()
 
         self.ghosts.pinky.setStartNode(self.nodes.getNodeFromTiles(*self.mazedata.obj.addOffset(2, 3)))
         self.ghosts.inky.setStartNode(self.nodes.getNodeFromTiles(*self.mazedata.obj.addOffset(0, 3)))
@@ -206,7 +227,8 @@ class GameController(object):
         self.textgroup.update(dt)
         self.pellets.update(dt)
         if not self.pause.paused:
-            self.ghosts.update(dt)      
+            self.ghosts.update(dt)
+            self.ghosts.notifyUpdate(dt)
             if self.fruit is not None:
                 self.fruit.update(dt)
             self.checkPelletEvents()
@@ -220,30 +242,21 @@ class GameController(object):
         else:
             self.pacman.update(dt)
 
-            #arma 27/5 dario
-        #for bullet in self.pacman.bullets[:]:
-        #    bullet.update(dt)
-        #    # Elimina la bala si sale de la pantalla
-        #    if bullet.position.x < 0 or bullet.position.x > SCREENSIZE[0]:
-        #        self.pacman.bullets.remove(bullet)
-            
-        #colision bala fantasma 
-        #TODO unificar update con colision DONE
-        #for bullet in self.pacman.bullets[:]:
+        #TODO esto, junto con la deteccion del laser y la bomba, deberian ir en checkGhostEvents
         for bullet in self.bullets[:]:
             bullet.update(dt)
-            # Elimina la bala si sale de la pantalla
-            if bullet.position.x < 0 or bullet.position.x > SCREENSIZE[0]:
+            #Chequea si la bala esta inactiva, i.e. si no es visible
+            if bullet.visible == False: 
                 self.bullets.remove(bullet)
+                continue
             for ghost in self.ghosts.ghosts[:]:
-                # Convierte ghost.position a pygame.math.Vector2 usando sus componentes x e y
-                #TODO estos ya son vector2, no?
-                #TODO quizas bullet deberia ser una entity?
-                bullet_pos = pygame.math.Vector2(bullet.position.x, bullet.position.y)
-                ghost_pos = pygame.math.Vector2(ghost.position.x, ghost.position.y)
-                if (bullet_pos - ghost_pos).length() < (bullet.radius + 16):
-                    ghost.startFreight() #los pone en freight...
-                    ghost.startSpawn() #... para inmediatamente ponerlos en spawn
+                if (bullet.position - ghost.position).magnitude() < (bullet.radius + 16):
+                    ghost.startFreight2() #los pone en freight...
+                    #Puntos. Mejor solo dar cuando pacman come a los fantasmas
+                    #self.updateScore(ghost.points)
+                    #self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1)
+                    #self.ghosts.updatePoints()
+                    ghost.startSpawn2() #... para inmediatamente ponerlos en spawn
                     self.nodes.allowHomeAccess(ghost)#Permite que el fantasma entre al medio
                     self.bullets.remove(bullet)
                     break
@@ -252,11 +265,11 @@ class GameController(object):
             for ghost in self.ghosts.ghosts[:]:
                 distance = abs(ghost.position.x - self.pacman.position.x) #mide la distancia entre Pacman y el fantasma
                 if distance < (ghost.collideRadius + LASERWIDTH/2): # si la distancia es menor que el radio de colision del fantasma mas el ancho del laser
-                    self.updateScore(ghost.points) # actualiza la puntuacion                 
+                    #self.updateScore(ghost.points) # actualiza la puntuacion                 
                    # self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1) # muestra el texto de la puntuacion
-                    self.ghosts.updatePoints() # actualiza los puntos de los fantasmas
-                    ghost.startFreight() # pone el fantasma en modo FREIGHT
-                    ghost.startSpawn() # pone el fantasma en modo SPAWN
+                    #self.ghosts.updatePoints() # actualiza los puntos de los fantasmas
+                    ghost.startFreight2() # pone el fantasma en modo FREIGHT
+                    ghost.startSpawn2() # pone el fantasma en modo SPAWN
                     self.nodes.allowHomeAccess(ghost) # permite que el fantasma entre al medio
                     explosion.play() # reproduce el sonido de perder una vida
                     explosion.set_volume(0.5)  # Ajusta el volumen del sonido
@@ -281,11 +294,10 @@ class GameController(object):
             powerup_classes = [SpeedBoostPowerUp, GunPowerUp, LaserPowerUp]
             PowerUpClass = random.choice(powerup_classes)
             # Solo elige posiciones donde hay pellets
-            if len(self.pellets.pelletList) > 0:
+            if len(self.pellets.pelletList) > 0: #TODO esto siempre es verdad no?
                 pellet = random.choice(self.pellets.pelletList)
                 self.powerup = PowerUpClass(pellet.position.x, pellet.position.y)
                 self.powerup_timer = 0  # Solo esto, elimina la otra línea
-
         if self.powerup is not None and self.pacman.collideCheck(self.powerup):
             # Si hay un power up activo, desactívalo antes de activar el nuevo
             if self.current_powerup is not None:
@@ -323,27 +335,14 @@ class GameController(object):
                             self.textgroup.showText(PAUSETXT)
                             #self.hideEntities()
 
+
                 # --- Aquí va el disparo con letra f 27/5 dario ---
-                elif event.key == K_RIGHT and self.pacman.has_gun:
-                    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (1, 0))
+                elif event.key == K_f and self.current_powerup is not None and self.current_powerup.name == GUN:
+                    bullet = Bullet2(self.pacman)
                     self.bullets.append(bullet)
                     canal_balas.play(balas)
                     pygame.time.set_timer(EVENTO_CORTE_DISPARO, 120)
-                elif event.key == K_LEFT and self.pacman.has_gun:
-                    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (-1, 0))
-                    self.bullets.append(bullet)
-                    canal_balas.play(balas)
-                    pygame.time.set_timer(EVENTO_CORTE_DISPARO, 120)
-                elif event.key == K_UP and self.pacman.has_gun:
-                    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (0, -1))
-                    self.bullets.append(bullet)
-                    canal_balas.play(balas)
-                    pygame.time.set_timer(EVENTO_CORTE_DISPARO, 120)
-                elif event.key == K_DOWN and self.pacman.has_gun:
-                    bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (0, 1))
-                    self.bullets.append(bullet)
-                    canal_balas.play(balas)
-                    pygame.time.set_timer(EVENTO_CORTE_DISPARO, 120)
+
 
     """ metodo checkPelletEvents de la clase GameController.
         Verifica si Pacman ha comido un pellet y actualiza la puntuación.
@@ -364,8 +363,11 @@ class GameController(object):
             if self.pellets.numEaten == 70:
                 self.ghosts.clyde.startNode.allowAccess(LEFT, self.ghosts.clyde)
             self.pellets.pelletList.remove(pellet)
-            if pellet.name == POWERPELLET:
-                self.ghosts.startFreight()
+            if pellet.name == POWERPELLET:#TODO GABI
+                #self.ghosts.startFreight()
+                self.ghosts.state = FREIGHT
+                self.ghosts.timelimit = FREIGHT_TIMELIMIT
+                self.ghosts.timer = 0
             if self.pellets.isEmpty():
                 self.flashBG = True
                 self.hideEntities()
@@ -383,16 +385,17 @@ class GameController(object):
             return  # No revises colisiones si está en pausa
         for ghost in self.ghosts:
             if self.pacman.collideGhost(ghost):
-                if ghost.mode.current is FREIGHT:
+                #if ghost.mode.current is FREIGHT:
+                if ghost.gabimode is FREIGHT:
                     self.pacman.visible = False
                     ghost.visible = False
                     self.updateScore(ghost.points)
                     self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1)
                     self.ghosts.updatePoints()
                     self.pause.setPause(pauseTime=1, func=self.showEntities)
-                    ghost.startSpawn()
+                    ghost.startSpawn2()##
                     self.nodes.allowHomeAccess(ghost) #TODO tarea de startSPawn? Raro
-                elif ghost.mode.current is not SPAWN:
+                elif ghost.gabimode is not SPAWN:
                     if self.pacman.alive:
                         self.lives -= 1
                         perdervida.play()
@@ -500,6 +503,7 @@ class GameController(object):
         if self.current_powerup is not None:
             self.current_powerup.deactivate(self.pacman)
             self.current_powerup = None
+        self.bullets.clear()
         self.startGame()
         self.score = 0
         self.textgroup.updateScore(self.score)
@@ -514,11 +518,10 @@ class GameController(object):
             self: Instancia de la clase GameController.
         """
     def resetLevel(self):
-        #GABI abajo
         if self.current_powerup is not None:
             self.current_powerup.deactivate(self.pacman)
             self.current_powerup = None
-        #GABI arriba
+        self.bullets.clear()
         self.pause.paused = True
         self.pacman.reset()
         self.ghosts.reset()

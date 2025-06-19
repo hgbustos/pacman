@@ -32,7 +32,7 @@ class MainMode(object):
             timer (float): Temporizador para controlar el tiempo en el modo de dispersión."""
     def scatter(self):
         self.mode = SCATTER
-        self.time = 7
+        self.time = SCATTER_TIMELIMIT
         self.timer = 0
     """ metodo chase de la clase MainMode.
         Cambia el modo actual a persecución y establece el tiempo asignado para este modo.
@@ -42,7 +42,7 @@ class MainMode(object):
             timer (float): Temporizador para controlar el tiempo en el modo de persecución."""
     def chase(self):
         self.mode = CHASE
-        self.time = 20
+        self.time = CHASE_TIMELIMIT
         self.timer = 0
 
 """ clase ModeController
