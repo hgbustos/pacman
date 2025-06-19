@@ -423,15 +423,15 @@ class GhostGroup2(object):
         if self.timer >= self.timelimit:#Mejor forma seguro hay
             self.timer = 0
             if self.state is SCATTER:
-                self.notify() #No es estrictamente desacoplado
                 self.state = CHASE
                 self.timelimit = CHASE_TIMELIMIT
-                print("switched to chase")
+                self.notify() #No es estrictamente desacoplado
+                #print("switched to chase") #TODO sacar estos prints
             elif self.state is CHASE or FREIGHT:
-                self.notify()
                 self.state = SCATTER
                 self.timelimit = SCATTER_TIMELIMIT
-                print("switched to scatter")
+                self.notify()
+                #print("switched to scatter")
 
     def setBlue(self):
         self.timer = 0
