@@ -128,6 +128,8 @@ class GunPowerUp(PowerUp):
 
     def activate(self, pacman):
         self.active = True
+        pacman.has_gun = True
+        pacman.bullets = []  # Reinicia lista de balas
 
     def deactivate(self, pacman):
         self.active = False
