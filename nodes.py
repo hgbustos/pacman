@@ -14,10 +14,10 @@ class Node(object):
     def __init__(self, x, y):
         self.position = Vector2(x, y)
         self.neighbors = {UP:None, DOWN:None, LEFT:None, RIGHT:None, PORTAL:None}
-        self.access = {UP:[PACMAN, BLINKY, PINKY, INKY, CLYDE, FRUIT], 
-                       DOWN:[PACMAN, BLINKY, PINKY, INKY, CLYDE, FRUIT], 
-                       LEFT:[PACMAN, BLINKY, PINKY, INKY, CLYDE, FRUIT], 
-                       RIGHT:[PACMAN, BLINKY, PINKY, INKY, CLYDE, FRUIT]}
+        self.access = {UP:[PACMAN, BLINKY, PINKY, INKY, CLYDE, FRUIT, BULLET], 
+                       DOWN:[PACMAN, BLINKY, PINKY, INKY, CLYDE, FRUIT, BULLET], 
+                       LEFT:[PACMAN, BLINKY, PINKY, INKY, CLYDE, FRUIT, BULLET], 
+                       RIGHT:[PACMAN, BLINKY, PINKY, INKY, CLYDE, FRUIT, BULLET]}
     """metodo denyAccess de la clase Node.
         Deniega el acceso a una entidad en una dirección específica.
         Args:

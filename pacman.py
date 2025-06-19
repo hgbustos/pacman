@@ -26,7 +26,9 @@ class Pacman(Entity):
         self.setBetweenNodes(LEFT)
         self.alive = True
         self.sprites = PacmanSprites(self)
-
+        #mod Joa TODO refactor en run.py esto?
+        self.has_laser = False
+        self.has_front_beam = False
     
     """ Inicializa la posición y el radio de colisión del personaje. 
     al igual que la dirección inicial y el estado de vida.
@@ -145,3 +147,24 @@ class Pacman(Entity):
         if dSquared <= rSquared:
             return True
         return False
+    
+    #27/5 dario
+    def draw(self, screen):
+        # Dibuja el sprite normal
+        screen.blit(self.image, (self.position.x - self.image.get_width() // 2, self.position.y - self.image.get_height() // 2))
+        # Si tiene arma, dibuja el arma
+        #if self.has_gun:
+        #    pygame.draw.rect(screen, (150, 150, 150), (self.position.x - 5, self.position.y - 20, 10, 15))
+        # Dibuja las balas si existen
+        for bullet in self.bullets:
+            bullet.draw(screen)
+    def render(self, screen):
+        # Dibuja el sprite normal (ajusta según tu código)
+        screen.blit(self.image, (self.position.x - self.image.get_width() // 2, self.position.y - self.image.get_height() // 2))
+        # Dibuja el laser
+        if self.has_laser:
+            laserVertical = pygame.Rect(int(self.position.x - LASERWIDTH//2), 0, LASERWIDTH, SCREENHEIGHT)
+            pygame.draw.rect(screen, (0, 255, 0), laserVertical)
+        #Dejo esto por si volvemos
+        #if self.has_gun:
+        #    pygame.draw.rect(screen, (150, 150, 150), (self.position.x-5, self.position.y-20, 10, 15))

@@ -143,9 +143,32 @@ class GhostSprites(Spritesheet):
         Args:
             dt (float): Delta time para la actualización de la imagen.
         """
+    #def update(self, dt):
+    #    x = self.x[self.entity.name]
+    #    if self.entity.mode.current in [SCATTER, CHASE]:
+    #        if self.entity.direction == LEFT:
+    #            self.entity.image = self.getImage(x, 8)
+    #        elif self.entity.direction == RIGHT:
+    #            self.entity.image = self.getImage(x, 10)
+    #        elif self.entity.direction == DOWN:
+    #            self.entity.image = self.getImage(x, 6)
+    #        elif self.entity.direction == UP:
+    #            self.entity.image = self.getImage(x, 4)
+    #    elif self.entity.mode.current == FREIGHT:
+    #        self.entity.image = self.getImage(10, 4)
+    #    elif self.entity.mode.current == SPAWN:
+    #        if self.entity.direction == LEFT:
+    #            self.entity.image = self.getImage(8, 8)
+    #        elif self.entity.direction == RIGHT:
+    #            self.entity.image = self.getImage(8, 10)
+    #        elif self.entity.direction == DOWN:
+    #            self.entity.image = self.getImage(8, 6)
+    #        elif self.entity.direction == UP:
+    #            self.entity.image = self.getImage(8, 4)
+
     def update(self, dt):
         x = self.x[self.entity.name]
-        if self.entity.mode.current in [SCATTER, CHASE]:
+        if self.entity.gabimode in [SCATTER, CHASE]:
             if self.entity.direction == LEFT:
                 self.entity.image = self.getImage(x, 8)
             elif self.entity.direction == RIGHT:
@@ -154,9 +177,9 @@ class GhostSprites(Spritesheet):
                 self.entity.image = self.getImage(x, 6)
             elif self.entity.direction == UP:
                 self.entity.image = self.getImage(x, 4)
-        elif self.entity.mode.current == FREIGHT:
+        elif self.entity.gabimode == FREIGHT:
             self.entity.image = self.getImage(10, 4)
-        elif self.entity.mode.current == SPAWN:
+        elif self.entity.gabimode == SPAWN:
             if self.entity.direction == LEFT:
                 self.entity.image = self.getImage(8, 8)
             elif self.entity.direction == RIGHT:
