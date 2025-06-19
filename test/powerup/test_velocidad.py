@@ -6,6 +6,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../.
 from pacman import Pacman
 from unittest.mock import MagicMock, patch
 velocidadprueba = 5.0
+os.environ
+import pygame
+pygame.mixer.init()
 class DummyPacman:
     
     def __init__(self):
