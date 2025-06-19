@@ -47,6 +47,8 @@ class Ghost(Entity):
         self.mode = ModeController(self)
         self.blinky = blinky
         self.homeNode = node
+        #modiificaion 27 / 5 para armas
+        self.position = pygame.math.Vector2(node.position.x, node.position.y)  
 
     """metodo para inicializar la posición y el radio de colisión del fantasma
         Args:
