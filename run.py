@@ -30,6 +30,12 @@ ambiente=pygame.mixer.Sound("sounds/ambiente.wav")
 run=pygame.mixer.Sound("sounds/run.wav")
 canal_balas = pygame.mixer.find_channel()
 EVENTO_CORTE_DISPARO = pygame.USEREVENT + 1
+explosion = pygame.mixer.Sound("sounds/explosion.wav")
+pygame.mixer.set_num_channels(2)  # Configura el número de canales de sonido
+canal1 = pygame.mixer.find_channel(0)
+canal2 = pygame.mixer.find_channel(1)
+
+
 
 """ clase GameController
     Controlador principal del juego Pacman."""
@@ -74,7 +80,6 @@ class GameController(object):
         self.fruitCaptured = []
         self.fruitNode = None
         self.mazedata = MazeData()
-
         
 
         #modificacion 27/5 dario
@@ -253,6 +258,9 @@ class GameController(object):
                     ghost.startFreight() # pone el fantasma en modo FREIGHT
                     ghost.startSpawn() # pone el fantasma en modo SPAWN
                     self.nodes.allowHomeAccess(ghost) # permite que el fantasma entre al medio
+                    explosion.play() # reproduce el sonido de perder una vida
+                    explosion.set_volume(0.5)  # Ajusta el volumen del sonido
+                    
 
         if self.flashBG:
             self.flashTimer += dt
@@ -300,6 +308,7 @@ class GameController(object):
         Si Pacman colisiona con un fantasma, verifica el estado del fantasma y actualiza la puntuación o las vidas.
         Si Pacman colisiona con la fruta, actualiza la puntuación y verifica si se ha capturado la fruta."""
     def checkEvents(self):
+        
         for event in pygame.event.get():
             if event.type == QUIT:
                 exit()
@@ -347,8 +356,8 @@ class GameController(object):
         pellet = self.pacman.eatPellets(self.pellets.pelletList)
         if pellet:
             self.pellets.numEaten += 1
-            recogermonedas.play()  # Reproduce el sonido de recoger monedas
-            recogermonedas.set_volume(0.2)  # Ajusta el volumen del sonido
+            canal2.play(recogermonedas)  # Reproduce el sonido de recoger monedas
+            canal2.set_volume(0.2)
             self.updateScore(pellet.points)
             if self.pellets.numEaten == 30:
                 self.ghosts.inky.startNode.allowAccess(RIGHT, self.ghosts.inky)
@@ -386,6 +395,8 @@ class GameController(object):
                 elif ghost.mode.current is not SPAWN:
                     if self.pacman.alive:
                         self.lives -= 1
+                        perdervida.play()
+                        perdervida.set_volume(0.3)  # Ajusta el volumen del sonido
                         self.lifesprites.removeImage()
                         self.pacman.die()
                         self.ghosts.hide()
@@ -394,6 +405,8 @@ class GameController(object):
                             self.textgroup.showText(GAMEOVERTXT)
                             pygame.display.update()
                             time.sleep(1)
+                            sonido_muerte.play()
+                            sonido_muerte.set_volume(0.3)  # Ajusta el volumen del sonido
                             opcion = game_over_menu(self.screen)
                             if opcion == "continue":
                                 self.restartGame()

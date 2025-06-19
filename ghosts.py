@@ -6,7 +6,17 @@ from entity import Entity
 from modes import ModeController
 from sprites import GhostSprites
 
-
+pygame.init()
+#configuracion de sonidos
+pygame.mixer.init()
+sonido_muerte=pygame.mixer.Sound("sounds/death.wav")
+recogermonedas = pygame.mixer.Sound("sounds/recogermonedas.wav")
+perdervida= pygame.mixer.Sound("sounds/perdervida.wav")
+balas= pygame.mixer.Sound("sounds/balas.wav")
+ambiente=pygame.mixer.Sound("sounds/ambiente.wav")
+run=pygame.mixer.Sound("sounds/run.wav")
+laser=pygame.mixer.Sound("sounds/laser.wav")
+explosion = pygame.mixer.Sound("sounds/explosion.wav")
 """ Clase que representa a los fantasmas en el juego
     Atributos:  
         name (str): Nombre del fantasma.
@@ -332,6 +342,7 @@ class GhostGroup(object):
             node (Node): Nodo de aparición del fantasma.
         """
     def reset(self):
+        explosion.play()
         for ghost in self:
             ghost.reset()
     """ metodo render para renderizar los fantasmas
@@ -339,6 +350,7 @@ class GhostGroup(object):
             node (Node): Nodo de aparición del fantasma.
         """
     def render(self, screen):
+        
         for ghost in self:
             ghost.render(screen)
 

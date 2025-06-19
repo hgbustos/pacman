@@ -11,6 +11,7 @@ perdervida= pygame.mixer.Sound("sounds/perdervida.wav")
 balas= pygame.mixer.Sound("sounds/balas.wav")
 ambiente=pygame.mixer.Sound("sounds/ambiente.wav")
 run=pygame.mixer.Sound("sounds/run.wav")
+laser=pygame.mixer.Sound("sounds/laser.wav")
 class PowerUp:
     def __init__(self, x, y, duration=5):
         self.x = x
@@ -74,11 +75,12 @@ class LaserPowerUp(PowerUp):
     def activate(self, pacman):
         self.active = True
         pacman.has_laser = True
-
+        laser.play()  # Reproduce el sonido del láser
+        laser.set_volume(0.1)  # Ajusta el volumen del sonido
     def deactivate(self, pacman):
         self.active = False
         pacman.has_laser = False
-
+        laser.stop()  # Detiene el sonido del láser
     def update(self, pacman, dt):
         if self.active:
             self.duration -= dt
