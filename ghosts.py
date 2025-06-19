@@ -30,6 +30,10 @@ from sprites import GhostSprites
         image (Surface): Imagen del fantasma.
         rect (Rect): Rectángulo de colisión del fantasma.
         """
+class Observer():
+    def notify():
+        pass
+
 class Ghost(Entity):
 
     """ metodo constructor de la clase Ghost
@@ -152,25 +156,29 @@ class Ghost(Entity):
             self.directionMethod = self.goalDirection
             self.spawn()
 
+    def observe(self):
+        if self.ghost_subject.state is FREIGHT:
+            self.startFreight2()
+            return
+        if self.ghost_subject.state not in [FREIGHT, SPAWN]:
+            self.normalMode()
+            self.gabimode = self.ghost_subject.state
+            return
+        if self.ghost_subject.state is SPAWN: #Sin uso, ergo el mal orden TODO
+            self.startSpawn2()
+
+
+
+    ##
     """ metodo normalMode funciona para iniciar el modo normal del fantasma
         Args:
             node (Node): Nodo de aparición del fantasma.
         """
     def normalMode(self):
         self.setSpeed(100)
-        print("Modo normal, velocidad: ", self.speed)
         self.directionMethod = self.goalDirection
         self.homeNode.denyAccess(DOWN, self)
 
-    ###FUNCIONES DE PRUEBA TODO GABI
-    #def update(self, dt):
-    #    self.sprites.update(dt)
-    #    self.mode.update(dt)
-    #    if self.gabimode is SCATTER:
-    #        self.scatter()
-    #    elif self.gabimode is CHASE:
-    #        self.chase()
-    #    Entity.update(self, dt)
 
 
 """ clase que representa a Blinky, un fantasma específico
@@ -388,7 +396,7 @@ class GhostGroup2(object):
 
     def __init__(self, node, pacman):
         self.timer = 0
-        self.time = SCATTER_TIMER
+        self.timelimit = SCATTER_TIMELIMIT
         ghosts = []
         self.state = SCATTER
         #Inicia fantasmas
@@ -397,10 +405,11 @@ class GhostGroup2(object):
         self.inky = Blinky(node, pacman)#, self.blinky)
         self.clyde = Blinky(node, pacman)
         self.ghosts = [self.blinky, self.pinky, self.inky, self.clyde]
-        self.attach(self.blinky)
-        self.attach(self.pinky)
-        self.attach(self.inky)
-        self.attach(self.clyde)
+
+
+    def notify(self):
+        for ghost in self.ghosts:
+            ghost.observe()
 
     def notifyUpdate(self, dt):
         self.timer += dt
@@ -411,15 +420,15 @@ class GhostGroup2(object):
                 self.state = CHASE
                 self.time = CHASE_TIMER
                 print("switched to chase")
-            elif self.state is CHASE:
+            elif self.state is CHASE or FREIGHT:
                 self.notifyScatter(dt)
                 self.state = SCATTER
                 self.time = SCATTER_TIMER
                 print("switched to scatter")
-        #else:
-        #    for ghost in self.ghosts:
-        #        ghost.update(dt) #hecho asi para evitar dos recorridos de ghosts TODO GABI
 
+    def setBlue(self):
+        self.timer = 0
+        self.time = FREIGHT_TIMELIMIT
 
     def attach(self, ghost):
         self.ghosts.append(ghost)
@@ -429,7 +438,6 @@ class GhostGroup2(object):
 
     def notifyChase(self, dt):
         for ghost in self.ghosts:
-            print("My mode is :", ghost.gabimode)
             if ghost.gabimode is not SPAWN or FREIGHT:
                 ghost.normalMode() 
                 ghost.gabimode = CHASE
