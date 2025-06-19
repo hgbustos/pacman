@@ -135,7 +135,7 @@ class GunPowerUp(PowerUp):
         self.active = False
         pacman.has_gun = False
         pacman.bullets = []
-        balas.stop()o
+        balas.stop()
 
     def update(self, pacman, dt):
         if self.active:
