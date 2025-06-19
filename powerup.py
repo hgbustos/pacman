@@ -2,7 +2,15 @@ import pygame
 from ghosts import GhostGroup 
 from ghosts import Ghost
 from constants import *
-
+pygame.init()
+#configuracion de sonidos
+pygame.mixer.init()
+sonido_muerte=pygame.mixer.Sound("sounds/death.wav")
+recogermonedas = pygame.mixer.Sound("sounds/recogermonedas.wav")
+perdervida= pygame.mixer.Sound("sounds/perdervida.wav")
+balas= pygame.mixer.Sound("sounds/balas.wav")
+ambiente=pygame.mixer.Sound("sounds/ambiente.wav")
+run=pygame.mixer.Sound("sounds/run.wav")
 class PowerUp:
     def __init__(self, x, y, duration=5):
         self.x = x
@@ -45,11 +53,14 @@ class SpeedBoostPowerUp(PowerUp):
     def activate(self, pacman):
         self.active = True
         pacman.speed *= 2  # Duplica la velocidad de Pacman
-
+        run.play()  # Reproduce el sonido de correr
+        run.set_volume(0.2)  # Ajusta el volumen del sonido
+        ambiente.stop()  # Detiene el sonido de ambiente si está sonando
+        recogermonedas.stop()  # Detiene el sonido de recoger monedas
     def deactivate(self, pacman):
         self.active = False
         pacman.speed /= 2  # Vuelve a la velocidad normal
-
+        run.stop()  # Detiene el sonido de correr
     # update no es necesario hacer override porque no tiene lógica especial
 
 
@@ -112,6 +123,7 @@ class GunPowerUp(PowerUp):
         self.active = False
         pacman.has_gun = False
         pacman.bullets = []
+        balas.stop()  # Detiene el sonido de disparo
 
     def update(self, pacman, dt):
         if self.active:
@@ -129,9 +141,8 @@ class Bullet:
 
     def update(self, dt):
         self.position += self.direction * self.speed * dt
-
+        
     def render(self, screen):
         pygame.draw.circle(screen, self.color, (int(self.position.x), int(self.position.y)), self.radius)
-
 
 

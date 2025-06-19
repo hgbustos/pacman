@@ -19,8 +19,17 @@ from powerup import PowerUp,LaserPowerUp,GunPowerUp, SpeedBoostPowerUp
 from powerup import Bullet
 import random
 
-
-
+pygame.init()
+#configuracion de sonidos
+pygame.mixer.init()
+sonido_muerte=pygame.mixer.Sound("sounds/death.wav")
+recogermonedas = pygame.mixer.Sound("sounds/recogermonedas.wav")
+perdervida= pygame.mixer.Sound("sounds/perdervida.wav")
+balas= pygame.mixer.Sound("sounds/balas.wav")
+ambiente=pygame.mixer.Sound("sounds/ambiente.wav")
+run=pygame.mixer.Sound("sounds/run.wav")
+canal_balas = pygame.mixer.find_channel()
+EVENTO_CORTE_DISPARO = pygame.USEREVENT + 1
 
 """ clase GameController
     Controlador principal del juego Pacman."""
@@ -309,15 +318,24 @@ class GameController(object):
                 elif event.key == K_RIGHT and self.pacman.has_gun:
                     bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (1, 0))
                     self.bullets.append(bullet)
+                    canal_balas.play(balas)
+                    pygame.time.set_timer(EVENTO_CORTE_DISPARO, 120)
                 elif event.key == K_LEFT and self.pacman.has_gun:
                     bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (-1, 0))
                     self.bullets.append(bullet)
+                    canal_balas.play(balas)
+                    pygame.time.set_timer(EVENTO_CORTE_DISPARO, 120)
                 elif event.key == K_UP and self.pacman.has_gun:
                     bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (0, -1))
                     self.bullets.append(bullet)
+                    canal_balas.play(balas)
+                    pygame.time.set_timer(EVENTO_CORTE_DISPARO, 120)
                 elif event.key == K_DOWN and self.pacman.has_gun:
                     bullet = Bullet(self.pacman.position.x, self.pacman.position.y, (0, 1))
                     self.bullets.append(bullet)
+                    canal_balas.play(balas)
+                    pygame.time.set_timer(EVENTO_CORTE_DISPARO, 120)
+
     """ metodo checkPelletEvents de la clase GameController.
         Verifica si Pacman ha comido un pellet y actualiza la puntuación.
         Si se ha comido un pellet, verifica si es un power pellet y actualiza el estado de los fantasmas.
@@ -329,6 +347,8 @@ class GameController(object):
         pellet = self.pacman.eatPellets(self.pellets.pelletList)
         if pellet:
             self.pellets.numEaten += 1
+            recogermonedas.play()  # Reproduce el sonido de recoger monedas
+            recogermonedas.set_volume(0.2)  # Ajusta el volumen del sonido
             self.updateScore(pellet.points)
             if self.pellets.numEaten == 30:
                 self.ghosts.inky.startNode.allowAccess(RIGHT, self.ghosts.inky)
