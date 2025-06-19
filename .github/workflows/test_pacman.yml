@@ -25,4 +25,4 @@ jobs:
 
       - name: Ejecutar pruebas
         run: |
-          pytest test_pacman.py
+          pytest
