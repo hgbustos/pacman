@@ -20,9 +20,15 @@ from powerup import Bullet, Bullet2
 import random
 from vector import Vector2
 
-
-
-
+pygame.init()
+#configuracion de sonidos
+pygame.mixer.init()
+sonido_muerte=pygame.mixer.Sound("sounds/death.wav")
+recogermonedas = pygame.mixer.Sound("sounds/recogermonedas.wav")
+perdervida= pygame.mixer.Sound("sounds/perdervida.wav")
+balas= pygame.mixer.Sound("sounds/balas.wav")
+ambiente=pygame.mixer.Sound("sounds/ambiente.wav")
+run=pygame.mixer.Sound("sounds/run.wav")
 """ clase GameController
     Controlador principal del juego Pacman."""
 class GameController(object):
@@ -184,7 +190,7 @@ class GameController(object):
         self.nodes.denyAccessList(15, 14, UP, self.ghosts)
         self.nodes.denyAccessList(12, 26, UP, self.ghosts)
         self.nodes.denyAccessList(15, 26, UP, self.ghosts)
-
+        
         
     """ metodo update de la clase GameController.
         Actualiza el estado del juego, incluyendo la posición de Pacman, los pellets,
@@ -193,6 +199,7 @@ class GameController(object):
             dt (float): Delta time para el temporizador.
         """
     def update(self):
+        
         dt = self.clock.tick(30) / 1000.0
         self.textgroup.update(dt)
         self.pellets.update(dt)
@@ -289,6 +296,8 @@ class GameController(object):
         Si Pacman colisiona con un fantasma, verifica el estado del fantasma y actualiza la puntuación o las vidas.
         Si Pacman colisiona con la fruta, actualiza la puntuación y verifica si se ha capturado la fruta."""
     def checkEvents(self):
+        ambiente.play()  # Reproduce el sonido de ambiente en bucle
+        ambiente.set_volume(0.1)  # Ajusta el volumen del sonido de ambiente
         for event in pygame.event.get():
             if event.type == QUIT:
                 exit()
@@ -317,6 +326,9 @@ class GameController(object):
         pellet = self.pacman.eatPellets(self.pellets.pelletList)
         if pellet:
             self.pellets.numEaten += 1
+            ambiente.stop()  # Detiene el sonido de ambiente al recoger una moneda
+            recogermonedas.play()  # Reproduce el sonido de recoger monedas
+            recogermonedas.set_volume(0.3)  # Ajusta el volumen del sonido
             self.updateScore(pellet.points)
             if self.pellets.numEaten == 30:
                 self.ghosts.inky.startNode.allowAccess(RIGHT, self.ghosts.inky)
@@ -371,6 +383,7 @@ class GameController(object):
                                 exit()
                         else:
                            #self.textgroup.showText("¡Perdiste una vida!")
+                            perdervida.play()
                             self.textgroup.showText(READYTXT)
                             pygame.display.update()
                             time.sleep(1)
