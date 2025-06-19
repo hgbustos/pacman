@@ -133,7 +133,9 @@ class GunPowerUp(PowerUp):
 
     def deactivate(self, pacman):
         self.active = False
-        balas.stop()  # Detiene el sonido de disparo
+        pacman.has_gun = False
+        pacman.bullets = []
+        balas.stop()o
 
     def update(self, pacman, dt):
         if self.active:
