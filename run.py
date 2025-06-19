@@ -133,13 +133,13 @@ class GameController(object):
         self.ghosts.blinky = Blinky(tempNode,self.pacman, self.ghosts)
         self.ghosts.blinky.subscribe()
         #pinky
-        self.ghosts.pinky = Blinky(tempNode,self.pacman, self.ghosts)
+        self.ghosts.pinky = Pinky(tempNode,self.pacman, self.ghosts)
         self.ghosts.pinky.subscribe()
         #inky
-        self.ghosts.inky = Blinky(tempNode,self.pacman, self.ghosts)#, self.ghosts.blinky)
+        self.ghosts.inky = Inky(tempNode,self.pacman, self.ghosts, self.ghosts.blinky)
         self.ghosts.inky.subscribe()
         #clyde
-        self.ghosts.clyde = Blinky(tempNode,self.pacman, self.ghosts)
+        self.ghosts.clyde = Clyde(tempNode,self.pacman, self.ghosts)
         self.ghosts.clyde.subscribe()
 
         self.ghosts.pinky.setStartNode(self.nodes.getNodeFromTiles(*self.mazedata.obj.addOffset(2, 3)))
@@ -235,14 +235,11 @@ class GameController(object):
             if bullet.visible == False: 
                 self.bullets.remove(bullet)
                 continue
-            # Elimina la bala si sale de la pantalla -- No necesario, la bala no pasa de un nodo
-            #if bullet.position.x < 0 or bullet.position.x > SCREENSIZE[0]:
-            #    self.bullets.remove(bullet)
             for ghost in self.ghosts.ghosts[:]:
                 if (bullet.position - ghost.position).magnitude() < (bullet.radius + 16):
                     ghost.startFreight2() #los pone en freight...
-                    #self.updateScore(ghost.points)
                     #Puntos. Mejor solo dar cuando pacman come a los fantasmas
+                    #self.updateScore(ghost.points)
                     #self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1)
                     #self.ghosts.updatePoints()
                     ghost.startSpawn2() #... para inmediatamente ponerlos en spawn

@@ -219,7 +219,7 @@ class Pinky(Ghost):
             blinky (Blinky): Referencia al objeto Blinky.
         """
     def __init__(self, node, pacman=None, ghost_subject=None, blinky=None):
-        Ghost.__init__(self, node, pacman, blinky)
+        Ghost.__init__(self, node, pacman, ghost_subject, blinky)
         self.name = PINKY
         self.color = PINK
         self.sprites = GhostSprites(self)
@@ -251,7 +251,7 @@ class Inky(Ghost):
             blinky (Blinky): Referencia al objeto Blinky.
         """
     def __init__(self, node, pacman=None, ghost_subject=None, blinky=None):
-        Ghost.__init__(self, node, pacman, blinky)
+        Ghost.__init__(self, node, pacman, ghost_subject, blinky)
         self.name = INKY
         self.color = TEAL
         self.sprites = GhostSprites(self)
@@ -285,7 +285,7 @@ class Clyde(Ghost):
             blinky (Blinky): Referencia al objeto Blinky.
         """
     def __init__(self, node, pacman=None, ghost_subject=None, blinky=None):
-        Ghost.__init__(self, node, pacman, blinky)
+        Ghost.__init__(self, node, pacman, ghost_subject, blinky)
         self.name = CLYDE
         self.color = ORANGE
         self.sprites = GhostSprites(self)
