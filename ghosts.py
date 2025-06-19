@@ -6,6 +6,7 @@ from entity import Entity
 from modes import ModeController
 from sprites import GhostSprites
 
+#from nodes import * #GABI TODO
 
 """ Clase que representa a los fantasmas en el juego
     Atributos:  
@@ -47,6 +48,9 @@ class Ghost(Entity):
         self.mode = ModeController(self)
         self.blinky = blinky
         self.homeNode = node
+        #TODO
+        self.gabimode = SCATTER
+        #self.ghost_subject = GhostGroup2(self.) #TODO GABI
         #modiificaion 27 / 5 para armas
         self.position = pygame.math.Vector2(node.position.x, node.position.y)  
 
@@ -70,6 +74,20 @@ class Ghost(Entity):
             self.scatter()
         elif self.mode.current is CHASE:
             self.chase()
+        Entity.update(self, dt)
+
+    def update2(self, dt):
+        self.sprites.update(dt)
+        #self.mode.update(dt)
+        #
+        if self.gabimode is SCATTER:
+            self.scatter()
+        elif self.gabimode is CHASE:
+            self.chase()
+        elif self.gabimode is SPAWN:
+            if self.entity.node == self.entity.spawnNode:
+                self.entity.normalMode()
+                self.gabimode = SCATTER #GABI TODO aca deberia usar el estado actual
         Entity.update(self, dt)
 
     """ metodo para establecer la velocidad del fantasma
@@ -120,6 +138,19 @@ class Ghost(Entity):
         if self.mode.current == FREIGHT:
             self.setSpeed(50)
             self.directionMethod = self.randomDirection         
+    #TODO GABI
+    def startFreight2(self):
+        if self.gabimode is not SPAWN:
+            self.gabimode = FREIGHT
+            self.setSpeed(50)
+            self.directionMethod = self.randomDirection         
+
+    def startSpawn2(self):
+        if self.gabimode is FREIGHT:
+            self.gabimode == SPAWN
+            self.setSpeed(150)
+            self.directionMethod = self.goalDirection
+            self.spawn()
 
     """ metodo normalMode funciona para iniciar el modo normal del fantasma
         Args:
@@ -127,9 +158,19 @@ class Ghost(Entity):
         """
     def normalMode(self):
         self.setSpeed(100)
+        print("Modo normal, velocidad: ", self.speed)
         self.directionMethod = self.goalDirection
         self.homeNode.denyAccess(DOWN, self)
 
+    ###FUNCIONES DE PRUEBA TODO GABI
+    #def update(self, dt):
+    #    self.sprites.update(dt)
+    #    self.mode.update(dt)
+    #    if self.gabimode is SCATTER:
+    #        self.scatter()
+    #    elif self.gabimode is CHASE:
+    #        self.chase()
+    #    Entity.update(self, dt)
 
 
 """ clase que representa a Blinky, un fantasma específico
@@ -342,3 +383,122 @@ class GhostGroup(object):
         for ghost in self:
             ghost.render(screen)
 
+
+class GhostGroup2(object):
+
+    def __init__(self, node, pacman):
+        self.timer = 0
+        self.time = SCATTER_TIMER
+        ghosts = []
+        self.state = SCATTER
+        #Inicia fantasmas
+        self.blinky = Blinky(node, pacman)
+        self.pinky = Blinky(node, pacman)
+        self.inky = Blinky(node, pacman)#, self.blinky)
+        self.clyde = Blinky(node, pacman)
+        self.ghosts = [self.blinky, self.pinky, self.inky, self.clyde]
+        self.attach(self.blinky)
+        self.attach(self.pinky)
+        self.attach(self.inky)
+        self.attach(self.clyde)
+
+    def notifyUpdate(self, dt):
+        self.timer += dt
+        if self.timer >= self.time:#Mejor forma seguro hay
+            self.timer = 0
+            if self.state is SCATTER:
+                self.notifyChase(dt) #No es estrictamente desacoplado
+                self.state = CHASE
+                self.time = CHASE_TIMER
+                print("switched to chase")
+            elif self.state is CHASE:
+                self.notifyScatter(dt)
+                self.state = SCATTER
+                self.time = SCATTER_TIMER
+                print("switched to scatter")
+        #else:
+        #    for ghost in self.ghosts:
+        #        ghost.update(dt) #hecho asi para evitar dos recorridos de ghosts TODO GABI
+
+
+    def attach(self, ghost):
+        self.ghosts.append(ghost)
+
+    def deattach(self, ghost):
+        self.ghosts.remove(ghost)
+
+    def notifyChase(self, dt):
+        for ghost in self.ghosts:
+            print("My mode is :", ghost.gabimode)
+            if ghost.gabimode is not SPAWN or FREIGHT:
+                ghost.normalMode() 
+                ghost.gabimode = CHASE
+                #ghost.chase()
+                #ghost.update(dt)
+
+    def notifyScatter(self, dt):
+        for ghost in self.ghosts:
+            if ghost.gabimode is not SPAWN or FREIGHT:
+                ghost.normalMode() 
+                ghost.gabimode = SCATTER
+                #ghost.scatter()
+                #ghost.update(dt)
+
+    def update(self, dt):
+        for ghost in self.ghosts:
+            ghost.update2(dt)
+
+    #copypaste GABI
+    def __iter__(self):
+        return iter(self.ghosts)
+
+    def startFreight(self):
+        for ghost in self.ghosts:
+            ghost.startFreight2()
+        self.resetPoints()
+
+    def setSpawnNode(self, node):
+        for ghost in self.ghosts:
+            ghost.setSpawnNode(node)
+    """ metodo updatePoints para actualizar los puntos de los fantasmas
+        Args:
+            node (Node): Nodo de aparición del fantasma.
+        """
+    def updatePoints(self):
+        for ghost in self.ghosts:
+            ghost.points *= 2
+    """ metodo resetPoints para restablecer los puntos de los fantasmas
+        Args:
+            node (Node): Nodo de aparición del fantasma.
+        """
+    def resetPoints(self):
+        for ghost in self.ghosts:
+            ghost.points = 200
+    """ metodo hide para ocultar los fantasmas
+        Args:
+            node (Node): Nodo de aparición del fantasma.
+        """
+    def hide(self):
+        for ghost in self.ghosts:
+            ghost.visible = False
+    """ metodo show para mostrar los fantasmas
+        Args:
+            node (Node): Nodo de aparición del fantasma.
+        """
+    def show(self):
+        for ghost in self.ghosts:
+            ghost.visible = True
+    """ metodo reset para restablecer los fantasmas
+        Args:
+            node (Node): Nodo de aparición del fantasma.
+        """
+    def reset(self):
+        for ghost in self.ghosts:
+            ghost.reset()
+    """ metodo render para renderizar los fantasmas
+        Args:
+            node (Node): Nodo de aparición del fantasma.
+        """
+    def render(self, screen):
+        for ghost in self.ghosts:
+            ghost.render(screen)
