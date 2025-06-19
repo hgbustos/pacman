@@ -393,6 +393,7 @@ class GhostGroup(object):
             node (Node): Nodo de aparición del fantasma.
         """
     def render(self, screen):
+        
         for ghost in self:
             ghost.render(screen)
 

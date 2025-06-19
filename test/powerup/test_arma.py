@@ -2,10 +2,13 @@ from powerup import GunPowerUp, Bullet
 import pytest
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../src')))
+
 from pacman import Pacman
 from unittest.mock import MagicMock, patch
-
+os.environ
+import pygame
+pygame.mixer.init()
 class DummyPacman:
     def __init__(self):
         self.has_gun = False

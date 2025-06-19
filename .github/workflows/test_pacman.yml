@@ -25,7 +25,11 @@ jobs:
           pip install pytest
           pip install pygame
           pip install numpy
+          
+      - name: INSTALAR DRIVER DE AUDIO
+        run: echo "SDL_AUDIODRIVER=dummy" >> $GITHUB_ENV
 
       - name: Ejecutar pruebas
         run: |
           pytest
+      
