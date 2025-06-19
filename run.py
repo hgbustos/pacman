@@ -4,7 +4,8 @@ from constants import *
 from pacman import Pacman
 from nodes import NodeGroup
 from pellets import PelletGroup
-from ghosts import GhostGroup
+#from ghosts import GhostGroup, GhostGroup2 TODO GABI
+from ghosts import *
 from fruit import Fruit
 from pauser import Pause
 from text import TextGroup
@@ -124,7 +125,22 @@ class GameController(object):
         self.mazedata.obj.connectHomeNodes(self.nodes)
         self.pacman = Pacman(self.nodes.getNodeFromTiles(*self.mazedata.obj.pacmanStart))
         self.pellets = PelletGroup(self.mazedata.obj.name+".txt")
-        self.ghosts = GhostGroup(self.nodes.getStartTempNode(), self.pacman)
+
+        tempNode = self.nodes.getStartTempNode()#TODO
+        self.ghosts = GhostGroup2()
+        #TODO GABI - Crear fantasmas uno por uno
+        #blinky
+        self.ghosts.blinky = Blinky(tempNode,self.pacman, self.ghosts)
+        self.ghosts.blinky.subscribe()
+        #pinky
+        self.ghosts.pinky = Blinky(tempNode,self.pacman, self.ghosts)
+        self.ghosts.pinky.subscribe()
+        #inky
+        self.ghosts.inky = Blinky(tempNode,self.pacman, self.ghosts)#, self.ghosts.blinky)
+        self.ghosts.inky.subscribe()
+        #clyde
+        self.ghosts.clyde = Blinky(tempNode,self.pacman, self.ghosts)
+        self.ghosts.clyde.subscribe()
 
         self.ghosts.pinky.setStartNode(self.nodes.getNodeFromTiles(*self.mazedata.obj.addOffset(2, 3)))
         self.ghosts.inky.setStartNode(self.nodes.getNodeFromTiles(*self.mazedata.obj.addOffset(0, 3)))
@@ -197,7 +213,8 @@ class GameController(object):
         self.textgroup.update(dt)
         self.pellets.update(dt)
         if not self.pause.paused:
-            self.ghosts.update(dt)      
+            self.ghosts.update(dt)
+            #self.ghosts.notifyUpdate(dt)
             if self.fruit is not None:
                 self.fruit.update(dt)
             self.checkPelletEvents()
@@ -212,37 +229,37 @@ class GameController(object):
             self.pacman.update(dt)
 
         #TODO esto, junto con la deteccion del laser y la bomba, deberian ir en checkGhostEvents
-        for bullet in self.bullets[:]:
-            bullet.update(dt)
-            #Chequea si la bala esta inactiva, i.e. si no es visible
-            if bullet.visible == False: 
-                self.bullets.remove(bullet)
-                continue
-            # Elimina la bala si sale de la pantalla -- No necesario, la bala no pasa de un nodo
-            #if bullet.position.x < 0 or bullet.position.x > SCREENSIZE[0]:
-            #    self.bullets.remove(bullet)
-            for ghost in self.ghosts.ghosts[:]:
-                if (bullet.position - ghost.position).magnitude() < (bullet.radius + 16):
-                    ghost.startFreight() #los pone en freight...
-                    self.updateScore(ghost.points)
-                    #Puntos. Mejor solo dar cuando pacman come a los fantasmas
-                    #self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1)
-                    #self.ghosts.updatePoints()
-                    ghost.startSpawn() #... para inmediatamente ponerlos en spawn
-                    self.nodes.allowHomeAccess(ghost)#Permite que el fantasma entre al medio
-                    self.bullets.remove(bullet)
-                    break
-        # mod Joa 04/06
-        if self.pacman.has_laser:
-            for ghost in self.ghosts.ghosts[:]:
-                distance = abs(ghost.position.x - self.pacman.position.x) #mide la distancia entre Pacman y el fantasma
-                if distance < (ghost.collideRadius + LASERWIDTH/2): # si la distancia es menor que el radio de colision del fantasma mas el ancho del laser
-                    self.updateScore(ghost.points) # actualiza la puntuacion                 
-                   # self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1) # muestra el texto de la puntuacion
-                    self.ghosts.updatePoints() # actualiza los puntos de los fantasmas
-                    ghost.startFreight() # pone el fantasma en modo FREIGHT
-                    ghost.startSpawn() # pone el fantasma en modo SPAWN
-                    self.nodes.allowHomeAccess(ghost) # permite que el fantasma entre al medio
+        #for bullet in self.bullets[:]:
+        #    bullet.update(dt)
+        #    #Chequea si la bala esta inactiva, i.e. si no es visible
+        #    if bullet.visible == False: 
+        #        self.bullets.remove(bullet)
+        #        continue
+        #    # Elimina la bala si sale de la pantalla -- No necesario, la bala no pasa de un nodo
+        #    #if bullet.position.x < 0 or bullet.position.x > SCREENSIZE[0]:
+        #    #    self.bullets.remove(bullet)
+        #    for ghost in self.ghosts.ghosts[:]:
+        #        if (bullet.position - ghost.position).magnitude() < (bullet.radius + 16):
+        #            ghost.startFreight() #los pone en freight...
+        #            self.updateScore(ghost.points)
+        #            #Puntos. Mejor solo dar cuando pacman come a los fantasmas
+        #            #self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1)
+        #            #self.ghosts.updatePoints()
+        #            ghost.startSpawn() #... para inmediatamente ponerlos en spawn
+        #            self.nodes.allowHomeAccess(ghost)#Permite que el fantasma entre al medio
+        #            self.bullets.remove(bullet)
+        #            break
+        ## mod Joa 04/06
+        #if self.pacman.has_laser:
+        #    for ghost in self.ghosts.ghosts[:]:
+        #        distance = abs(ghost.position.x - self.pacman.position.x) #mide la distancia entre Pacman y el fantasma
+        #        if distance < (ghost.collideRadius + LASERWIDTH/2): # si la distancia es menor que el radio de colision del fantasma mas el ancho del laser
+        #            self.updateScore(ghost.points) # actualiza la puntuacion                 
+        #           # self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1) # muestra el texto de la puntuacion
+        #            self.ghosts.updatePoints() # actualiza los puntos de los fantasmas
+        #            ghost.startFreight() # pone el fantasma en modo FREIGHT
+        #            ghost.startSpawn() # pone el fantasma en modo SPAWN
+        #            self.nodes.allowHomeAccess(ghost) # permite que el fantasma entre al medio
 
         if self.flashBG:
             self.flashTimer += dt
@@ -258,27 +275,27 @@ class GameController(object):
             afterPauseMethod()
 
         # modificacion 27/5 dario
-        self.powerup_timer += dt
-        if self.powerup is None and self.powerup_timer >= self.powerup_interval:
-            powerup_classes = [SpeedBoostPowerUp, GunPowerUp, LaserPowerUp]
-            PowerUpClass = random.choice(powerup_classes)
-            # Solo elige posiciones donde hay pellets
-            if len(self.pellets.pelletList) > 0: #TODO esto siempre es verdad no?
-                pellet = random.choice(self.pellets.pelletList)
-                self.powerup = PowerUpClass(pellet.position.x, pellet.position.y)
-                self.powerup_timer = 0  # Solo esto, elimina la otra línea
-        if self.powerup is not None and self.pacman.collideCheck(self.powerup):
-            # Si hay un power up activo, desactívalo antes de activar el nuevo
-            if self.current_powerup is not None:
-                self.current_powerup.deactivate(self.pacman)
-            self.current_powerup = self.powerup
-            self.current_powerup.activate(self.pacman)
-            self.powerup = None
+        #self.powerup_timer += dt
+        #if self.powerup is None and self.powerup_timer >= self.powerup_interval:
+        #    powerup_classes = [SpeedBoostPowerUp, GunPowerUp, LaserPowerUp]
+        #    PowerUpClass = random.choice(powerup_classes)
+        #    # Solo elige posiciones donde hay pellets
+        #    if len(self.pellets.pelletList) > 0: #TODO esto siempre es verdad no?
+        #        pellet = random.choice(self.pellets.pelletList)
+        #        self.powerup = PowerUpClass(pellet.position.x, pellet.position.y)
+        #        self.powerup_timer = 0  # Solo esto, elimina la otra línea
+        #if self.powerup is not None and self.pacman.collideCheck(self.powerup):
+        #    # Si hay un power up activo, desactívalo antes de activar el nuevo
+        #    if self.current_powerup is not None:
+        #        self.current_powerup.deactivate(self.pacman)
+        #    self.current_powerup = self.powerup
+        #    self.current_powerup.activate(self.pacman)
+        #    self.powerup = None
 
-        if self.current_powerup is not None:
-            self.current_powerup.update(self.pacman, dt)
-            if not self.current_powerup.active:
-                self.current_powerup = None
+        #if self.current_powerup is not None:
+        #    self.current_powerup.update(self.pacman, dt)
+        #    if not self.current_powerup.active:
+        #        self.current_powerup = None
 
         self.checkEvents()
         self.render()
@@ -306,6 +323,7 @@ class GameController(object):
                 elif event.key == K_f and self.current_powerup is not None and self.current_powerup.name == GUN:
                     bullet = Bullet2(self.pacman)
                     self.bullets.append(bullet)
+
     """ metodo checkPelletEvents de la clase GameController.
         Verifica si Pacman ha comido un pellet y actualiza la puntuación.
         Si se ha comido un pellet, verifica si es un power pellet y actualiza el estado de los fantasmas.
@@ -323,8 +341,9 @@ class GameController(object):
             if self.pellets.numEaten == 70:
                 self.ghosts.clyde.startNode.allowAccess(LEFT, self.ghosts.clyde)
             self.pellets.pelletList.remove(pellet)
-            if pellet.name == POWERPELLET:
-                self.ghosts.startFreight()
+            if pellet.name == POWERPELLET:#TODO GABI
+                #self.ghosts.startFreight()
+                self.ghosts.state = FREIGHT
             if self.pellets.isEmpty():
                 self.flashBG = True
                 self.hideEntities()
