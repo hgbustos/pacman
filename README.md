@@ -29,3 +29,4 @@ Volver a poner todos los powerups como spawneables antes de pedir merge!!!!
 
 + GhostSubject solo envia cambios de estado. NO ACTUALIZA LOS FANTASMAS (Por ahora???)
 + Fantasmas rapidazos
++ Modificar sprites

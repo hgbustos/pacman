@@ -90,8 +90,8 @@ class Ghost(Entity, Observer):
         elif self.gabimode is CHASE:
             self.chase()
         elif self.gabimode is SPAWN:
-            if self.entity.node == self.entity.spawnNode:
-                self.entity.normalMode()
+            if self.node == self.spawnNode:
+                self.normalMode()
                 self.gabimode = SCATTER #GABI TODO aca deberia usar el estado actual
         Entity.update(self, dt)
 
@@ -152,7 +152,7 @@ class Ghost(Entity, Observer):
 
     def startSpawn2(self):
         if self.gabimode is FREIGHT:
-            self.gabimode == SPAWN
+            self.gabimode = SPAWN
             self.setSpeed(150)
             self.directionMethod = self.goalDirection
             self.spawn()
@@ -399,7 +399,6 @@ class GhostGroup(object):
 
 class GhostGroup2(object):
 
-    #def __init__(self, node, pacman):
     def __init__(self):
         self.timer = 0
         self.timelimit = SCATTER_TIMELIMIT
@@ -418,18 +417,20 @@ class GhostGroup2(object):
             ghost.observe()
 
     def notifyUpdate(self, dt):
+        if self.timer == 0 and self.state == FREIGHT:
+            self.notify()
         self.timer += dt
-        if self.timer >= self.time:#Mejor forma seguro hay
+        if self.timer >= self.timelimit:#Mejor forma seguro hay
             self.timer = 0
             if self.state is SCATTER:
-                self.notifyChase(dt) #No es estrictamente desacoplado
+                self.notify() #No es estrictamente desacoplado
                 self.state = CHASE
-                self.time = CHASE_TIMELIMIT
+                self.timelimit = CHASE_TIMELIMIT
                 print("switched to chase")
             elif self.state is CHASE or FREIGHT:
-                self.notifyScatter(dt)
+                self.notify()
                 self.state = SCATTER
-                self.time = SCATTER_TIMELIMIT
+                self.timelimit = SCATTER_TIMELIMIT
                 print("switched to scatter")
 
     def setBlue(self):
@@ -444,19 +445,19 @@ class GhostGroup2(object):
 
     def notifyChase(self, dt):
         for ghost in self.ghosts:
-            if ghost.gabimode is not SPAWN or FREIGHT:
-                ghost.normalMode() 
-                ghost.gabimode = CHASE
+                ghost.notify()
+                #ghost.gabimode = CHASE
                 #ghost.chase()
                 #ghost.update(dt)
 
     def notifyScatter(self, dt):
-        for ghost in self.ghosts:
-            if ghost.gabimode is not SPAWN or FREIGHT:
-                ghost.normalMode() 
-                ghost.gabimode = SCATTER
-                #ghost.scatter()
-                #ghost.update(dt)
+        pass
+        #for ghost in self.ghosts:
+            #if ghost.gabimode is not SPAWN or FREIGHT:
+            #    ghost.normalMode() 
+            #    ghost.gabimode = SCATTER
+            #    #ghost.scatter()
+            #    #ghost.update(dt)
 
     def update(self, dt):
         for ghost in self.ghosts:

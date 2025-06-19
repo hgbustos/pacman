@@ -214,7 +214,7 @@ class GameController(object):
         self.pellets.update(dt)
         if not self.pause.paused:
             self.ghosts.update(dt)
-            #self.ghosts.notifyUpdate(dt)
+            self.ghosts.notifyUpdate(dt)
             if self.fruit is not None:
                 self.fruit.update(dt)
             self.checkPelletEvents()
@@ -344,6 +344,8 @@ class GameController(object):
             if pellet.name == POWERPELLET:#TODO GABI
                 #self.ghosts.startFreight()
                 self.ghosts.state = FREIGHT
+                self.ghosts.timelimit = FREIGHT_TIMELIMIT
+                self.ghosts.timer = 0
             if self.pellets.isEmpty():
                 self.flashBG = True
                 self.hideEntities()
@@ -361,16 +363,17 @@ class GameController(object):
             return  # No revises colisiones si está en pausa
         for ghost in self.ghosts:
             if self.pacman.collideGhost(ghost):
-                if ghost.mode.current is FREIGHT:
+                #if ghost.mode.current is FREIGHT:
+                if ghost.gabimode is FREIGHT:
                     self.pacman.visible = False
                     ghost.visible = False
                     self.updateScore(ghost.points)
                     self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1)
                     self.ghosts.updatePoints()
                     self.pause.setPause(pauseTime=1, func=self.showEntities)
-                    ghost.startSpawn()
+                    ghost.startSpawn2()##
                     self.nodes.allowHomeAccess(ghost) #TODO tarea de startSPawn? Raro
-                elif ghost.mode.current is not SPAWN:
+                elif ghost.gabimode is not SPAWN:
                     if self.pacman.alive:
                         self.lives -= 1
                         self.lifesprites.removeImage()
